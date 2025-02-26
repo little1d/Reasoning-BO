@@ -1,0 +1,10 @@
+[project]
+name = "faithful-bo"
+version = "0.1.0"
+description = "Enhancing Bayesian Optimization with Long-Context Reasoning  Power in LLMs"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pre-commit>=4.1.0",
+    "ruff>=0.9.7",
+]
