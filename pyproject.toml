@@ -5,6 +5,18 @@ description = "Enhancing Bayesian Optimization with Long-Context Reasoning  Powe
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "black>=25.1.0",
+    "camel>=0.1.2",
+    "lightrag-hku>=1.2.1",
     "pre-commit>=4.1.0",
+    "pymilvus>=2.5.4",
     "ruff>=0.9.7",
 ]
+
+
+[tool.black]
+line-length = 79
+skip-string-normalization = true
+
+[tool.ruff.format]
+docstring-code-format = true

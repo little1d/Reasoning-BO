@@ -1,1 +1,8 @@
+# env
+.venv*/
+.conda*/
+.env
+
 playground/
+
+swanlog/
