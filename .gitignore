@@ -1,8 +1,18 @@
-# env
+# Python
+**/__pycache__/
+**/*.egg-info/
+
+
+# Environment
 .venv*/
-.conda*/
 .env
 
+# Debug
+**/.pytest_cache/
 playground/
 
+# Tracking
 swanlog/
+
+
+
