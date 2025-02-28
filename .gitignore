@@ -14,5 +14,6 @@ playground/
 # Tracking
 swanlog/
 
-
+# OS specific
+.DS_Store
 
