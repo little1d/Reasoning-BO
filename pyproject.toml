@@ -9,6 +9,7 @@ dependencies = [
     "camel>=0.1.2",
     "hatchling>=1.27.0",
     "lightrag-hku>=1.2.1",
+    "neo4j>=5.28.1",
     "openai>=1.64.0",
     "pre-commit>=4.1.0",
     "pymilvus>=2.5.4",
@@ -29,3 +30,9 @@ skip-string-normalization = true
 
 [tool.ruff.format]
 docstring-code-format = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::UserWarning",
+    'ignore:function ham\(\) is deprecated:DeprecationWarning',
+]

@@ -152,6 +152,7 @@ dependencies = [
     { name = "camel" },
     { name = "hatchling" },
     { name = "lightrag-hku" },
+    { name = "neo4j" },
     { name = "openai" },
     { name = "pre-commit" },
     { name = "pymilvus" },
@@ -165,6 +166,7 @@ requires-dist = [
     { name = "camel", specifier = ">=0.1.2" },
     { name = "hatchling", specifier = ">=1.27.0" },
     { name = "lightrag-hku", specifier = ">=1.2.1" },
+    { name = "neo4j", specifier = ">=5.28.1" },
     { name = "openai", specifier = ">=1.64.0" },
     { name = "pre-commit", specifier = ">=4.1.0" },
     { name = "pymilvus", specifier = ">=2.5.4" },
@@ -394,6 +396,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/98/a4/1ab47638b92648243faf97a5aeb6ea83059cc3624972ab6b8d2316078d3f/mypy_extensions-1.0.0.tar.gz", hash = "sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782", size = 4433 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/e2/5d3f6ada4297caebe1a2add3b126fe800c96f56dbe5d1988a2cbe0b267aa/mypy_extensions-1.0.0-py3-none-any.whl", hash = "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d", size = 4695 },
+]
+
+[[package]]
+name = "neo4j"
+version = "5.28.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4b/20/733dac16f7cedc80b23093415822c9763302519cba0e7c8bcdb5c01fc512/neo4j-5.28.1.tar.gz", hash = "sha256:ae8e37a1d895099062c75bc359b2cce62099baac7be768d0eba7180c1298e214", size = 231094 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6a/57/94225fe5e9dabdc0ff60c88cbfcedf11277f4b34e7ab1373d3e62dbdd207/neo4j-5.28.1-py3-none-any.whl", hash = "sha256:6755ef9e5f4e14b403aef1138fb6315b120631a0075c138b5ddb2a06b87b09fd", size = 312258 },
 ]
 
 [[package]]
