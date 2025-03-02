@@ -1,6 +1,6 @@
 import pytest
 from openai import OpenAI
-from src.app.config import Config
+from src.config.config import Config
 
 
 class TestOpenAI:

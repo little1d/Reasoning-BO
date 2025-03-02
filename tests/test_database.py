@@ -1,12 +1,17 @@
 from pymilvus import connections
 from neo4j import GraphDatabase
 import pytest
+from src.config import Config
+
+config = Config()
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_milvus_connection():
-    # host 填 docker 容器所在机器 ip
-    connections.connect(alias="default", host='10.140.52.87', port='19530')
+    # host 填 docker 容器所在机器 ip，在 .env 中配置
+    connections.connect(
+        alias="default", host=config.MILVUS_HOST, port=config.MILVUS_PORT
+    )
 
     connection_list = connections.list_connections()
     assert len(connection_list) == 1
@@ -15,8 +20,8 @@ def test_milvus_connection():
 
 
 def test_neo4j_connection():
-    URI = "bolt://10.140.52.87:7687"
-    AUTH = ("neo4j", "123456789")
+    URI = config.NEO4J_URL
+    AUTH = (config.NEO4J_USERNAME, config.NEO4J_PASSWORD)
 
     with GraphDatabase.driver(URI, auth=AUTH) as driver:
         driver.verify_connectivity()
