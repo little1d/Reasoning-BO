@@ -2,7 +2,6 @@ import pytest
 from ax import (
     ComparisonOp,
     Experiment,
-    Metric,
     Objective,
     OptimizationConfig,
     OutcomeConstraint,
