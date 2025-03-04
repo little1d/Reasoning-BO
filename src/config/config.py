@@ -20,6 +20,9 @@ class Config:
         self.OPENAI_API_BASE = os.getenv("OPENAI_API_BASE")
         self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
         self.OPENAI_MODEL_NAME = os.getenv("OPENAI_MODEL_NAME")
+        self.DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+        self.DEEPSEEK_API_BASE = os.getenv("DEEPSEEK_API_BASE")
+        self.DEEPSEEK_MODEL_NAME = os.getenv("DEEPSEEK_MODEL_NAME")
         self.NEO4J_URL = "bolt://10.140.52.87:7687"
         self.NEO4J_USERNAME = "neo4j"
         self.NEO4J_PASSWORD = "123456789"

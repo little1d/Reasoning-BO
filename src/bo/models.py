@@ -50,6 +50,8 @@ class BOModel:
 
         return self.model_bridge.gen(n=n)
 
+    
+
     def easy_render_hartmann6(self):
         # 只适用于 gen(n=1)和 notbook，因为 objective_means 只有那个有
         objective_means = np.array(
