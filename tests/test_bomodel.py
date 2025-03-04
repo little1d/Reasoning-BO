@@ -1,27 +1,78 @@
 import pytest
-from src.bo.models import BOModel
-from ax.utils.testing.core_stubs import (
-    get_branin_data,
-    get_branin_experiment,
+from ax import (
+    ComparisonOp,
+    Experiment,
+    Metric,
+    Objective,
+    OptimizationConfig,
+    OutcomeConstraint,
+    ParameterType,
+    RangeParameter,
+    SearchSpace,
+    Runner,
 )
+from src.bo.models import BOModel
 from ax.core.arm import Arm
 from ax.core.generator_run import GeneratorRun
+from ax.metrics.l2norm import L2NormMetric
+from ax.metrics.hartmann6 import Hartmann6Metric
+
+# ---------------------------------- define a runner ----------------------------------
+
+
+class MyRunner(Runner):
+    def run(self, trial):
+        trial_metadata = {"name": str(trial.index)}
+        return trial_metadata
 
 
 @pytest.fixture
 def experiment():
-    return get_branin_experiment(with_trial=True)
+    # ---------------------------------- create search space ----------------------------------
+    hartmann_search_space = SearchSpace(
+        parameters=[
+            RangeParameter(
+                name=f"x{i}",
+                parameter_type=ParameterType.FLOAT,
+                lower=0.0,
+                upper=1.0,
+            )
+            for i in range(6)
+        ]
+    )
+    param_names = [f"x{i}" for i in range(6)]
 
-
-@pytest.fixture
-def data(experiment):
-    return get_branin_data(trials=[experiment.trials[0]])
+    # ---------------------------------- create optimization config ----------------------------------
+    optimization_config = OptimizationConfig(
+        objective=Objective(
+            metric=Hartmann6Metric(name="hartman6", param_names=param_names),
+            minimize=True,
+        ),
+        outcome_constraints=[
+            OutcomeConstraint(
+                metric=L2NormMetric(
+                    name="l2norm", param_names=param_names, noise_sd=0.2
+                ),
+                op=ComparisonOp.LEQ,
+                bound=1.25,
+                relative=False,
+            )
+        ],
+    )
+    # ---------------------------------- create experiment ----------------------------------
+    exp = Experiment(
+        name="test_hartmann",
+        search_space=hartmann_search_space,
+        optimization_config=optimization_config,
+        runner=MyRunner(),
+    )
+    return exp
 
 
 class Test_BOModel:
-    def test_bo_model(self, experiment, data):
-        bo_model = BOModel(experiment, data)
-        bo_model.init_model()
+    def test_bo_model(self, experiment):
+        bo_model = BOModel(experiment)
+        bo_model.hot_start(experiment)
         for i in range(2):
             generator_run = bo_model.gen(n=3)
             print(generator_run.arms)
