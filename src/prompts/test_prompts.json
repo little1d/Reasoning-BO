@@ -1,0 +1,6 @@
+{
+    "test": {
+        "en": "hello, I'm {name}, {age} years old",
+        "zh": "你好，我是{name}，{age}岁"
+    }
+}
