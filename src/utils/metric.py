@@ -5,11 +5,10 @@ r"""
 @File: src/utils/metric.py
 @IDE: vscode
 @Description:
-    封装一些对于
+    从 ax 到结果存储的转换函数，还包括一些 io 函数
 """
 import numpy as np
 from ax import Experiment, Trial
-import json
 import csv
 import os
 

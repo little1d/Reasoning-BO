@@ -23,6 +23,8 @@ class DeepSeekClient:
         Reasoning 数据太长，没必要保存对话历史，不如提取关键信息保存到本地
         Single round generation method without retaining message history.
         """
+        # 不保留对话记录！！！
+        self.messages = []
         self.messages.append({"role": "user", "content": user_prompt})
         response = self.client.chat.completions.create(
             model="deepseek-reasoner",
@@ -48,6 +50,14 @@ class DeepSeekClient:
     ) -> Tuple[str, str]:
         """
         Multi-round generation method with retained message history.
+        Multi-round 是很有必要的，messages 通过 append 方式增量存储数据，并且 user_prompt 和 content
+        天然后成 QA 对，再结合reasoning data 就可以 distill 小模型。少 IO，不用从外部再赋值一遍，同时避免了 jsonl 的复杂存取。
+        但是可能会超上下文，，且 system_prompt 包含如果 128K（约等于 96000～128000 汉字）
+        # TODO
+        但其实又没啥必要，多轮对话的 user_prompt（包含 comment_history）太多重复，宁愿牺牲 io 时间换上下文窗口和 llm 处理时间。 我已经想到了新的 distill data 构造方式
+        question: 历史 metrics 数据和 arm，为一个表格，再加一些 prompts。 类似：”这是历史的数据和结果，你应该怎么安排来提高 metrics“。
+        reasoning: deepseek generate 的 reasoning data， jsonl 格式
+        comment: 保存的 comment data ， jsonl 格式
         """
         """返回元组 (content, reasoning_content) 非流式"""
         # 追加用户消息到历史记录
