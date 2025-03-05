@@ -20,7 +20,7 @@ def save_trial_data(
     save_dir: str,
     filename: str,
 ) -> None:
-    """进行一轮 Trial/BatchTrial 后，保存 arms 和 metrics到本地，作为参考提供给 llm
+    """进行一轮 Trial/BatchTrial 后，保存 arms 和 metrics到本地，作为参考在下一轮提供给 llm
 
     Parameters
     ----------
@@ -39,6 +39,8 @@ def save_trial_data(
     data_df = experiment.fetch_trials_data(trial_indices=[trial.index]).df
 
     # 构建数据记录
+    # arms需要从 trial object 拿，metric 要从 experiment 对象拿。先全部记录成 record，再存储
+    # 没办法，我也不想写💩山的
     record = {
         "trial_index": trial.index,
         "arms_parameters": [
@@ -60,12 +62,12 @@ def save_trial_data(
             for _, row in data_df.iterrows()
         ],
     }
-    json_file = os.path.join(save_dir, f"{filename}.json")
+    # json_file = os.path.join(save_dir, f"{filename}.json")
 
-    # 保存JSON
-    with open(json_file, 'a+') as f:
-        json.dump(record, f, indent=2)
-        f.write('\n')
+    # 保存JSON，但其实没啥必要，可以调试，看看这一轮实验
+    # with open(json_file, 'a+') as f:
+    #     json.dump(record, f, indent=2)
+    #     f.write('\n')
 
     # 生成结构化CSV表格
     # 获取参数列名（排除arm_name）
@@ -95,16 +97,16 @@ def save_trial_data(
 
             if mean_value is not None:
                 row = {
-                    "arm_name": arm["arm_name"],
+                    "trial_index": arm["arm_name"],
                     **{col: arm[col] for col in param_columns},
-                    "mean": round(mean_value, 3),
+                    f"{metric}_mean_value": round(mean_value, 3),
                 }
                 rows.append(row)
 
         # 按arm_name排序
         rows.sort(key=lambda x: [int(n) for n in x["arm_name"].split('_')])
 
-        # 写入CSV文件
+        # 写入CSV文件，增量存储
         with open(csv_filename, 'a+', newline='') as f:
             writer = csv.DictWriter(
                 f, fieldnames=["arm_name"] + param_columns + ["mean"]
@@ -116,7 +118,10 @@ def save_trial_data(
 
 def extract_metric(exp: Experiment, metric_name: str) -> np.ndarray:
     """
-    提取实验对象中指定metric的均值序列，用于所有实验结束后，结果的展示
+    提取实验对象中指定metric的均值序列，用于所有实验结束后，结果的展示。其实在 save_trial_data 函数中，会把
+    所有的 metrics 增量存储到 xxx_metric.csc 中，但那是以 arm 为最小单位的。对于 BatchTrial 来说，一个 Batch
+    里不同 arm 的 metric 值可能相差很大。针对最后结果绘图而言，取均值是很合理的，可以反映上一轮 sample 的 candidates 整体水平，
+    随着实验的进行，mean 理论上是逐渐升高的。
     参数：
         exp: 实验对象
         metric_name: 需要提取的指标名称（如'hartman6'），在 objective/constriant 中定义的"name"一样
