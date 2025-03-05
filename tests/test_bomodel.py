@@ -81,8 +81,8 @@ class Test_BOModel:
             # format like [{'x1': -4, 'x2': 0.0}, {'x1': 10.0, 'x2': 4}, {'x1': -5.0, 'x2': 15.0}]
             # TODO
             # add llm filtering logic
-            # llm = ReasoningModel()
-            # filtered_arms = llm.filter(candidates)
+            # llm = R1Reasoner()
+            # filtered_arms = llm.recommend(candidates)
             # print(filtered_arms)
             # format like [{'x1': -4, 'x2': 0.0}]
             filtered_candidates = [
