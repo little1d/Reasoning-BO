@@ -2,5 +2,9 @@
     "test": {
         "en": "hello, I'm {name}, {age} years old",
         "zh": "你好，我是{name}，{age}岁"
+    },
+    "overview_generate": {
+        "en": "Experiment Overview: {description}\nOptimization Parameters:\nThe experiment design space is defined by the parameters below, including their bounds and any relevant constraints: \nParameters_and_bounds: {parameters_and_bounds}\nConstraint: {constraint}\nTask:\nIn approximately 200 words, provide a clear and concise overview of this experiment. Summarize the experimental goal, describe the parameters and eventual constraints that will guide the optimization process, and explain the intended outcome. Tell us how Bayesian Optimization (BO) will be employed to systematically explore the parameter space, while receiving point suggestions from you when BO plateaus, identifying conditions that {target}.",
+        "zh": ""
     }
 }

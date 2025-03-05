@@ -5,7 +5,7 @@ r"""
 @File: src/bo/models.py
 @IDE: vscode
 @Description:
-    BO model
+    BO model, Reasoning model
 """
 
 from ax.modelbridge.registry import Models
@@ -16,16 +16,15 @@ from botorch.models.gp_regression import SingleTaskGP
 
 import numpy as np
 import json
-from datetime import datetime
 from ax.plot.trace import optimization_trace_single_method
 from ax.utils.notebook.plotting import render
 import json
-import re
-from datetime import datetime
-from openai import OpenAI
-import os
 from src.config import Config
 from typing import Dict
+
+from src.prompts.base import PromptManager
+from src.llms.deepseek import DeepSeekClient
+
 
 config = Config()
 
@@ -81,14 +80,32 @@ class BOModel:
 class DSReasoner:
     def __init__(self, exp_config_path: str):
         self.exp_config = self._load_config(exp_config_path)
+        self.client = DeepSeekClient()
+        self.prompt_manager = PromptManager()
+        self.overview_generate_prompt = ""
 
     def _load_config(self, path: str) -> Dict:
         with open(path, 'r') as f:
             return json.loads(f)
 
-    def generate_overview(self, prompts) -> str:
-        
+    def generate_overview(self) -> str:
+        try:
+            print("Start generating overview")
+            formatted_prompt = self.prompt_manager.format(
+                "overview_generate", **self.exp_config
+            )
+            print(f"Formatted prompt: {formatted_prompt}")
+
+            content, _ = self.client.generate(user_prompt=formatted_prompt)
+
+            self.overview_generate_prompt = content
+
+            return content
+
+        except Exception as e:
+            print(f"Error generating overview: {e}")
+            return ""
 
 
-class O1Reasoner:
-    pass
+# class O1Reasoner:
+#     pass

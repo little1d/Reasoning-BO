@@ -2,67 +2,45 @@
     "name": "Bayesian Optimization on Hartmann6",
     "domain": "Global Optimization",
     "description": "Minimize the 6-dimensional Hartmann6 function using Bayesian optimization. The function is synthetic, multimodal, and widely used as a benchmark for black-box optimization algorithms.",
-    "constrained": "No explicit constraints (variables are bound to [0, 1]).",
-    "parameters": [
+    "constraint": "No explicit constraints (variables are bound to [0, 1]).",
+    "parameters_and_bounds": [
         {
             "name": "x1",
-            "description": "First dimension of the Hartmann6 input",
             "bounds": [
                 0.0,
                 1.0
-            ],
-            "type": "continuous",
-            "step": null
+            ]
         },
         {
             "name": "x2",
-            "description": "Second dimension of the Hartmann6 input",
             "bounds": [
                 0.0,
                 1.0
-            ],
-            "type": "continuous",
-            "step": null
+            ]
         },
         {
             "name": "x3",
-            "description": "Third dimension of the Hartmann6 input",
             "bounds": [
                 0.0,
                 1.0
-            ],
-            "type": "continuous",
-            "step": null
+            ]
         },
         {
             "name": "x4",
-            "description": "Fourth dimension of the Hartmann6 input",
             "bounds": [
                 0.0,
                 1.0
-            ],
-            "type": "continuous",
-            "step": null
+            ]
         },
         {
-            "name": "x5",
-            "description": "Fifth dimension of the Hartmann6 input",
-            "bounds": [
-                0.0,
-                1.0
-            ],
-            "type": "continuous",
-            "step": null
+            "name": "x5"
         },
         {
             "name": "x6",
-            "description": "Sixth dimension of the Hartmann6 input",
             "bounds": [
                 0.0,
                 1.0
-            ],
-            "type": "continuous",
-            "step": null
+            ]
         }
     ],
     "target": {

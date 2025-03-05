@@ -40,7 +40,7 @@ class PromptManager:
                 with open(filepath, "r", encoding="utf-8") as f:
                     try:
                         prompt_data = json.load(f)
-                        print(f"Loaded {filename}: {prompt_data}")
+                        print(f"Loaded {filename}")
                         # 确保 prompt_data 结构是字典
                         if not isinstance(prompt_data, dict):
                             raise ValueError(
