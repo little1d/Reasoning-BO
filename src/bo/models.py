@@ -79,14 +79,15 @@ class BOModel:
 
 class DSReasoner:
     def __init__(self, exp_config_path: str):
+        # 最好写绝对路径吧。。。
         self.exp_config = self._load_config(exp_config_path)
         self.client = DeepSeekClient()
         self.prompt_manager = PromptManager()
         self.overview_generate_prompt = ""
 
     def _load_config(self, path: str) -> Dict:
-        with open(path, 'r') as f:
-            return json.loads(f)
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
 
     def generate_overview(self) -> str:
         try:

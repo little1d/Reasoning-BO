@@ -1,4 +1,5 @@
 import pytest
+import os
 from ax import (
     ComparisonOp,
     Experiment,
@@ -15,6 +16,7 @@ from ax.core.arm import Arm
 from ax.core.generator_run import GeneratorRun
 from ax.metrics.l2norm import L2NormMetric
 from ax.metrics.hartmann6 import Hartmann6Metric
+from src.bo.models import DSReasoner
 
 # ---------------------------------- define a runner ----------------------------------
 
@@ -98,3 +100,13 @@ class Test_BOModel:
             assert generator_run.arms is not None
             assert filtered_candidates is not None
         assert bo_model.model_bridge is not None
+
+
+class TestDSReasoner:
+    def test_generate_overview(self):
+        # 这路径太难写了。。。
+        file_path = "/Users/little1d/Desktop/Code/Faithful-BO/src/config/hartmann6_config.json"
+        ds_reasoner = DSReasoner(file_path)
+        overview = ds_reasoner.generate_overview()
+        print(overview)
+        assert overview is not None
