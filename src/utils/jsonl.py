@@ -5,7 +5,7 @@ r"""
 @File: src/utils/jsonl.py
 @IDE: vscode
 @Description:
-    封装一些 jsonl 存储与拼接读取的 useful 函数
+    封装一些 jsonl 存储与拼接读取的函数
 """
 
 
@@ -18,9 +18,21 @@ def add_to_jsonl(file_path, data):
         file.write(json_line + '\n')
 
 
+# 使用示例
+# file_path = 'data.jsonl'
+# data = {
+#     "trial_index": 2,
+#     "large_data": "adfdsad",
+# }
+# add_to_jsonl(file_path, data)
+
+
 def concatenate_jsonl(file_path):
     # TODO
     """拼接 comment_history 需要用到，将 jsonl 组织成一整块用于输入 llm"""
+    # 使用示例
+    # file_path = 'data.jsonl'
+    # concatenated_data = concatenate_jsonl(file_path)
     final_concatenated_data = []
 
     # Read each line in JSONL file

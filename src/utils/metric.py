@@ -103,7 +103,7 @@ def save_trial_data(
                 rows.append(row)
 
         # 按arm_name排序
-        rows.sort(key=lambda x: [int(n) for n in x["arm_name"].split('_')])
+        rows.sort(key=lambda x: [int(n) for n in x["trial_index"].split('_')])
 
         # 写入CSV文件，增量存储
         with open(csv_filename, 'a+', newline='') as f:

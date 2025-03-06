@@ -90,7 +90,6 @@ def test_save_trial_data(initialize_experiment):
     assert os.path.exists(
         saved_file_path
     ), "The trial data file was not saved."
-    
 
 
 def test_extract_metric_hartmann_values(initialize_experiment):
