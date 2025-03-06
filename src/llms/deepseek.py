@@ -1,6 +1,7 @@
 from openai import OpenAI
 from typing import Tuple
 from src.config import Config
+from src.utils.jsonl import add_to_jsonl
 
 config = Config()
 
@@ -28,6 +29,7 @@ class DeepSeekClient:
         Single round generation method without retaining message history.
         json_output: 拓展方法，comment_history 要求是 json 格式，但 ds 官方说这个 api 可能会输出为空，建议加 system_prompt 指导。
         目前是在 user_prompt 中加 prompt 规定 json output，可以达到要求。
+        如果测试稳定可以用这个 api，减少prompt，加速响应（但不排除 ds 官方也是通过 prompt 来强行适配）。
         """
         self.messages = []
         if json_output:
@@ -42,11 +44,18 @@ class DeepSeekClient:
             stream=False,
         )
         self.messages.append(
+            # think 只在generate 方法中加了
+            {
+                "role": "think",
+                "content": response.choices[0].message.reasoning_content,
+            },
+        )
+        self.messages.append(
             {
                 "role": "assistant",
                 "content": response.choices[0].message.content,
-            }
-        )
+            },
+        ),
         return (
             response.choices[0].message.content,
             response.choices[0].message.reasoning_content,
@@ -86,10 +95,6 @@ class DeepSeekClient:
             {
                 "role": "assistant",
                 "content": response.choices[0].message.content,
-            },
-            {
-                "role": "reasoning",
-                "content": response.choices[0].message.reasoning_content,
             },
         )
         return (self.content, self.reasoning_content)
@@ -134,6 +139,25 @@ class DeepSeekClient:
         for message in self.messages:
             print(f"{message['role'].capitalize()}: {message['content']}")
 
-    def save_distill_data(self):
-        """保存 client.messages 为 jsonl 格式"""
-        pass
+    def save_messages(self, file_path):
+        """
+        Save client.messages(list) content as JSONL format with paired user, think, assistant content.
+
+        Args:
+            file_path: The filepath where JSONL data will be saved.
+        """
+
+        print("Start saving the message data for this round of trials.\n")
+        distill_data = {}
+        for message in self.messages:
+            role = message.get("role")
+            content = message.get("content")
+
+            if role == "user":
+                distill_data["user"] = content
+            elif role == "think":
+                distill_data["think"] = content
+            elif role == "assistant":
+                distill_data["assistant"] = content
+        add_to_jsonl(file_path, distill_data)
+        print("Done!\n")

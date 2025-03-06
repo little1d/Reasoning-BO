@@ -13,7 +13,15 @@ import json
 
 
 def add_to_jsonl(file_path, data):
-    with open(file_path, 'a') as file:
+    """data 应该要是 python dict 格式!!!!!"""
+    # 如果是 json，转换为 python dict
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except json.JSONDecodeError:
+            raise ValueError("Input string is not a valid JSON object")
+    # 将python dict转换为 json 存储
+    with open(file_path, 'a+', encoding="utf-8") as file:
         json_line = json.dumps(data)
         file.write(json_line + '\n')
 
@@ -27,27 +35,58 @@ def add_to_jsonl(file_path, data):
 # add_to_jsonl(file_path, data)
 
 
+# jsonl
+# [
+#     {
+#         "trial_index": 1,
+#         "comment": "hello!",
+#     },
+#     {
+#         "trial_index": 2,
+#         "comment": "fuck!",
+#     },
+# ]
+
+
 def concatenate_jsonl(file_path):
     # TODO
     """拼接 comment_history 需要用到，将 jsonl 组织成一整块用于输入 llm"""
     # 使用示例
     # file_path = 'data.jsonl'
     # concatenated_data = concatenate_jsonl(file_path)
+
+    # 效果
+    # jsonl
+    # [
+    #     {
+    #         "trial_index": 1,
+    #         "comment": "hello!",
+    #     },
+    #     {
+    #         "trial_index": 2,
+    #         "comment": "fuck!",
+    #     },
+    # ]
+    # file_path = "./test.json"
+    # print(concatenate_jsonl(file_path=file_path))
+    # trial_index: 1:
+    # comment: hello!
+    # trial_index: 2:
+    # comment: fuck!
     final_concatenated_data = []
 
     # Read each line in JSONL file
-    with open(file_path, 'r') as file:
-        for line in file:
-            # Parse each line as JSON
-            data_entry = json.loads(line.strip())
+    with open(file_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
 
-            # Extract `trial_index` and `data` dynamically
-            trial_index = list(data_entry.values())[0]
-            data_value = list(data_entry.values())[1]
+        for entry in data:
+            # Extract keys dynamically
+            entry_parts = []
+            for key, value in entry.items():
+                entry_parts.append(f"{key}: {value}")
 
-            # Add trial index header and data to final output
-            final_concatenated_data.append(f"trial {trial_index}")
-            final_concatenated_data.append(data_value)
+            # Join entry parts and add to the final output
+            final_concatenated_data.append(":\n".join(entry_parts))
 
     # Concatenate all data with newlines
     concatenated_output = "\n".join(final_concatenated_data)

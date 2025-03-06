@@ -17,7 +17,6 @@ def save_trial_data(
     experiment: Experiment,
     trial: Trial,
     save_dir: str,
-    filename: str,
 ) -> None:
     """进行一轮 Trial/BatchTrial 后，保存 arms 和 metrics到本地，作为参考在下一轮提供给 llm
 
@@ -29,8 +28,6 @@ def save_trial_data(
         当前 trial 实例，可为 Trial 和 BatchTrial
     save_dir : str
         json 和 csv 文件保存目录
-    filename : str
-        json 和 csv 文件名
     """
     # 创建保存目录（如果不存在）
     os.makedirs(save_dir, exist_ok=True)
@@ -78,7 +75,7 @@ def save_trial_data(
     metrics = {m["metric_name"] for m in record["metric_data"]}
 
     for metric in metrics:
-        csv_filename = os.path.join(save_dir, f"{filename}_{metric}.csv")
+        csv_filename = os.path.join(save_dir, f"{metric}.csv")
         rows = []
 
         # 构建表格行数据
