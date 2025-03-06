@@ -17,17 +17,26 @@ class DeepSeekClient:
         self.reasoning_content = ""
 
     def generate(
-        self, user_prompt: str, max_tokens: int = 4096
+        self,
+        user_prompt: str,
+        max_tokens: int = 4096,
+        json_output: bool = False,
     ) -> Tuple[str, str]:
         """
+        `generate`方法不保留对话记录。这是因为 chat.completions api 本身是 stateless 的
         Reasoning 数据太长，没必要保存对话历史，不如提取关键信息保存到本地
         Single round generation method without retaining message history.
+        json_output: 拓展方法，comment_history 要求是 json 格式，但 ds 官方说这个 api 可能会输出为空，建议加 system_prompt 指导。
+        目前是在 user_prompt 中加 prompt 规定 json output，可以达到要求。
         """
-        # 不保留对话记录！！！
         self.messages = []
+        if json_output:
+            system_prompt = "response in JSON format"
+            self.messages.append({"role": "system", "content": system_prompt})
+
         self.messages.append({"role": "user", "content": user_prompt})
         response = self.client.chat.completions.create(
-            model="deepseek-reasoner",
+            model=config.DEEPSEEK_MODEL_NAME,
             messages=self.messages,
             max_tokens=max_tokens,
             stream=False,
@@ -77,7 +86,11 @@ class DeepSeekClient:
             {
                 "role": "assistant",
                 "content": response.choices[0].message.content,
-            }
+            },
+            {
+                "role": "reasoning",
+                "content": response.choices[0].message.reasoning_content,
+            },
         )
         return (self.content, self.reasoning_content)
 
@@ -120,3 +133,7 @@ class DeepSeekClient:
         """查看对话历史，方便调试"""
         for message in self.messages:
             print(f"{message['role'].capitalize()}: {message['content']}")
+
+    def save_distill_data(self):
+        """保存 client.messages 为 jsonl 格式"""
+        pass

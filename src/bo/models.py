@@ -91,6 +91,13 @@ class DSReasoner:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
 
+    def _save_comment(self, comment_history_file_path) -> None:
+        """保存返回的 comment（DSReasoner 的 Assitant 信息） 到 comment history 中，jsonl 格式"""
+        pass
+
+    def _save_trial_data(self):
+        pass
+
     def generate_overview(self) -> str:
         try:
             print("Start generating overview...")
@@ -133,6 +140,10 @@ class DSReasoner:
         except Exception as e:
             print(f"Error happended while initial sampling: {e}")
             return ""
+
+    def optimization_loop(self) -> str:
+        """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment"""
+        pass
 
 
 # class O1Reasoner:
