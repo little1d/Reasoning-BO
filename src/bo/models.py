@@ -79,11 +79,13 @@ class BOModel:
 
 class DSReasoner:
     def __init__(self, exp_config_path: str):
-        # 最好写绝对路径吧。。。
+        # 最好写绝对路径吧
         self.exp_config = self._load_config(exp_config_path)
         self.client = DeepSeekClient()
         self.prompt_manager = PromptManager()
-        self.overview_generate_prompt = ""
+        self.overview = ""
+        self.summary = ""
+        self.experiment_conclusion = ""
 
     def _load_config(self, path: str) -> Dict:
         with open(path, 'r', encoding='utf-8') as f:
@@ -91,20 +93,45 @@ class DSReasoner:
 
     def generate_overview(self) -> str:
         try:
-            print("Start generating overview")
+            print("Start generating overview...")
             formatted_prompt = self.prompt_manager.format(
                 "overview_generate", **self.exp_config
             )
-            print(f"Formatted prompt: {formatted_prompt}")
+            # print(f"Formatted prompt: {formatted_prompt}")
 
             content, _ = self.client.generate(user_prompt=formatted_prompt)
 
-            self.overview_generate_prompt = content
+            self.overview = content
 
+            print(
+                f"Overview has been generated! and the content is as follows\n {content}"
+            )
             return content
 
         except Exception as e:
             print(f"Error generating overview: {e}")
+            return ""
+
+    def initial_sampling(self) -> str:
+        # TODO
+        """没有overview 也能sample..."""
+        try:
+            print("Start initial sampling...")
+            meta_dict = {
+                **self.exp_config,
+                "overview": self.overview,
+            }
+            formatted_prompt = self.prompt_manager.format(
+                "initial_sampling", **meta_dict
+            )
+            content, _ = self.client.generate(user_prompt=formatted_prompt)
+            print(
+                f"initial sampling process has done! and the content is as follows\n {content}"
+            )
+            return content
+
+        except Exception as e:
+            print(f"Error happended while initial sampling: {e}")
             return ""
 
 

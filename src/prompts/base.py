@@ -20,7 +20,7 @@ class PromptManager:
                 The directory where prompt JSON files are stored.
         """
         self.prompt_dir = prompt_dir
-        print("Prompts registry directory:", self.prompt_dir)
+        # print("Prompts registry directory:", self.prompt_dir)
         self.prompts = {}
         self._load_all_prompts()
 
@@ -40,7 +40,7 @@ class PromptManager:
                 with open(filepath, "r", encoding="utf-8") as f:
                     try:
                         prompt_data = json.load(f)
-                        print(f"Loaded {filename}")
+                        # print(f"Loaded {filename}")
                         # 确保 prompt_data 结构是字典
                         if not isinstance(prompt_data, dict):
                             raise ValueError(
