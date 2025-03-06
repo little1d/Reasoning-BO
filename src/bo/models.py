@@ -91,13 +91,13 @@ class DSReasoner:
         os.makedirs(result_dir, exist_ok=True)
         if not self.result_dir.endswith(('/', '\\')):
             self.result_dir = self.result_dir + "/"
-        self.comment_history_file_path = (
-            self.result_dir + "comment_history.jsonl"
-        )
         # trial data contains arms and metric, _save_trial_data function takes dir param
         # and create {metric}_.csv automatically
         self.trial_data_dir = self.result_dir + "trial_data/"
         self.messages_file_path = self.result_dir + "messages.jsonl"
+        self.experiment_analysis_file_path = (
+            self.result_dir + "experiment_analysis.json"
+        )
         # ---------------------------------- Object instance----------------------------------
         self.client = DeepSeekClient()
         self.prompt_manager = PromptManager()
@@ -186,15 +186,27 @@ class DSReasoner:
         self._save_messages()
         pass
 
-    def generate_summary(self):
+    def _generate_summary(self):
+        """返回 json 格式"""
+        print(f"generating summary...")
         pass
 
-    def generate_conclusion(self):
+    def _generate_conclusion(self):
+        """返回 json 格式"""
+        print(f"generating conclusion...")
         pass
 
-    def save_experiment_analysis(self):
+    def generate_experiment_analysis(self):
+        """overview + summary + conclusion, 从 self 里面拿，反正不是很多"""
         file_path = self.result_dir + "experiment_analysis.json"
-        pass
+
+        data_dict = {
+            "overview": self._generate_summary(),
+            "summary": self._generate_conclusion(),
+            "conclusion": self.conclusion,
+        }
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data_dict, f, ensure_ascii=False, indent=4)
 
 
 # class O1Reasoner:
