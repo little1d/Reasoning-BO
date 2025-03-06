@@ -108,7 +108,10 @@ def save_trial_data(
         # 写入CSV文件，增量存储
         with open(csv_filename, 'a+', newline='') as f:
             writer = csv.DictWriter(
-                f, fieldnames=["arm_name"] + param_columns + ["mean"]
+                f,
+                fieldnames=["trial_index"]
+                + param_columns
+                + [f"{metric}_mean_value"],
             )
             if f.tell() == 0:
                 writer.writeheader()
