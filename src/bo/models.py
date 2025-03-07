@@ -23,12 +23,13 @@ import json
 from src.config import Config
 from typing import Dict
 import os
+import glob
 
 from src.prompts.base import PromptManager
 from src.llms.deepseek import DeepSeekClient
 from src.utils.metric import save_trial_data
 
-from src.utils.jsonl import add_to_jsonl
+from src.utils.jsonl import add_to_jsonl, concatenate_jsonl
 
 config = Config()
 
@@ -95,6 +96,9 @@ class DSReasoner:
         # and create {metric}_.csv automatically
         self.trial_data_dir = self.result_dir + "trial_data/"
         self.messages_file_path = self.result_dir + "messages.jsonl"
+        self.comment_history_file_path = (
+            self.result_dir + "comment_history.jsonl"
+        )
         self.experiment_analysis_file_path = (
             self.result_dir + "experiment_analysis.json"
         )
@@ -111,6 +115,15 @@ class DSReasoner:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
 
+    def _load_trial_data(self):
+        """Load trial data from multiple CSV files as a combined string"""
+        csv_files = glob.glob(os.path.join(self.trial_data_dir), "*.csv")
+        combined_data = []
+        for file_path in csv_files:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                combined_data.append(file.read())
+        return "\n".join(combined_data)
+
     def _save_comment(self, trial_index: int) -> None:
         # 初始化没有comment，comment 是 str，需要转换成 json
         """保存返回的 comment（DSReasoner 的 Assitant 信息） 到 comment history 中，jsonl 格式"""
@@ -121,10 +134,32 @@ class DSReasoner:
     def _save_messages(self):
         self.client.save_messages(self.messages_file_path)
 
-    def _extract_candidates_from_comment(
-        self,
-    ):
-        """返回置信度最高的 5 个 candidates"""
+    def _extract_candidates_from_comment(self, comment, n):
+        """返回置信度最高的 n 个 candidates"""
+        CONFIDENCE_ORDER = {"high": 0, "medium": 1, "low": 2}
+        # json to dict
+        comment = json.loads(comment)
+        if not isinstance(comment, dict) or "hypotheses" not in comment:
+            raise ValueError("Invalid JSON format: missing 'hypotheses' key")
+
+        sorted_hypotheses = sorted(
+            comment["hypotheses"],
+            key=lambda x: CONFIDENCE_ORDER.get(x["confidence"].lower(), 3),
+        )
+
+        candidates = []
+        for hyp in sorted_hypotheses:
+            if "points" not in hyp or not isinstance(hyp["point"], list):
+                continue
+
+            for point in hyp["points"]:
+                if not isinstance(point, dict):
+                    continue
+                candidates.append(point)
+                if len(candidates) == n:
+                    return candidates
+        # 如果可用点不足 n 个，全部返回
+        return candidates
 
     def generate_overview(self) -> str:
         try:
@@ -162,29 +197,61 @@ class DSReasoner:
             )
             content, _ = self.client.generate(user_prompt=formatted_prompt)
             print(
-                f"Initial sampling process has done! and the content is as follows\n {content}\n\n"
+                f"Initial sampling process has done! and the comment is as follows\n {content}\n\n"
             )
-            self._save_messages()
             return content
 
         except Exception as e:
             print(f"Error happended while initial sampling: {e}")
             return ""
 
-    def optimization_first_round(
-        self,
-    ):
+    def optimization_first_round(self, comment):
         """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
+        candidates = self._extract_candidates_from_comment(comment)
+        self._save_comment(iteration=0)
+        self._save_messages()
+        return candidates
 
     def optimization_loop(self, experiment, trial: Trial) -> str:
-        """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment"""
+        """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment，并返回 candidates_array"""
+        # 加载 trial data， dir（self.trial_data_dir） 下面包含所有的 metrics.csv 文件
+        trial_data = self._load_trial_data()
+        # 加载 comment history   self.comment_history_file_path  是一个 jsonl 文件，可以通过concatenate_jsonl函数拼接 comment_history
+        comment_history = concatenate_jsonl(self.comment_history_file_path)
+        # 利用 prompt_template 生成 prompt。并使用dsreasoner.generate 生成 comment
+        condidates_array = []
+        try:
+            print(f"Start Optimizatoin iteration{trial.index}...")
+            # 把trial data, comment history 拼接到 meta_dict 中
+            meta_dict = {
+                **self.exp_config,
+                "iteration": trial.index,
+                "trial_data": trial_data,
+                "comment_history": comment_history,
+            }  # 待完善
+            # 利用 prompt template "optimization loop" 生成 formatted_prompt
+            formatted_prompt = self.prompt_manager.format(
+                "optimization_loop", **meta_dict
+            )
+            comment, _ = self.client.generate(user_prompt=formatted_prompt)
+            print(
+                f"Optimization loop iteration {trial.index} has done! and the comment is as follows\n {comment}\n\n"
+            )
+            condidates_array = self._extract_candidates_from_comment(comment)
 
+        except Exception as e:
+            print(f"Error happended while initial sampling: {e}")
+            return ""
+
+        # 保存数据
         save_trial_data(
             experiment=experiment, trial=trial, save_dir=self.trial_data_dir
         )
         self._save_comment(iteration=trial.index)
         self._save_messages()
-        pass
+
+        # 从comment中抽象candidates_array 并 return
+        return condidates_array
 
     def _generate_summary(self):
         """返回 json 格式"""
