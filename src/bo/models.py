@@ -134,7 +134,7 @@ class DSReasoner:
     def _save_messages(self):
         self.client.save_messages(self.messages_file_path)
 
-    def _extract_candidates_from_comment(self, comment, n):
+    def _extract_candidates_from_comment(self, comment, n: int = 5):
         """返回置信度最高的 n 个 candidates"""
         CONFIDENCE_ORDER = {"high": 0, "medium": 1, "low": 2}
         # json to dict
@@ -149,7 +149,7 @@ class DSReasoner:
 
         candidates = []
         for hyp in sorted_hypotheses:
-            if "points" not in hyp or not isinstance(hyp["point"], list):
+            if "points" not in hyp or not isinstance(hyp["points"], list):
                 continue
 
             for point in hyp["points"]:
@@ -206,13 +206,12 @@ class DSReasoner:
             return ""
 
     def optimization_first_round(self, comment):
-        """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
+        # 第一轮并没有 Trial，所以不保存任何数据，单独处理！
         candidates = self._extract_candidates_from_comment(comment)
-        self._save_comment(iteration=0)
-        self._save_messages()
         return candidates
 
     def optimization_loop(self, experiment, trial: Trial) -> str:
+        """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
         """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment，并返回 candidates_array"""
         # 加载 trial data， dir（self.trial_data_dir） 下面包含所有的 metrics.csv 文件
         trial_data = self._load_trial_data()
@@ -240,41 +239,64 @@ class DSReasoner:
             condidates_array = self._extract_candidates_from_comment(comment)
 
         except Exception as e:
-            print(f"Error happended while initial sampling: {e}")
+            print(
+                f"Error happended while optimization iteration {trial.index}: {e}"
+            )
             return ""
 
         # 保存数据
         save_trial_data(
             experiment=experiment, trial=trial, save_dir=self.trial_data_dir
         )
-        self._save_comment(iteration=trial.index)
+        self._save_comment(trial_index=trial.index)
         self._save_messages()
 
         # 从comment中抽象candidates_array 并 return
         return condidates_array
 
-    def _generate_summary(self):
-        """返回 json 格式"""
-        print(f"generating summary...")
-        pass
+    def _generate_summary(self, trial_data, comment_history):
+        """返回 json 格式，其实 markdown 更贴切"""
+        print(f"Start generating summary...\n")
+        meta_dict = {
+            **self.exp_config,
+            "trial_data": trial_data,
+            "comment_history": comment_history,
+        }
+        formatted_prompt = self.prompt_manager.format(
+            "generate_summary", **meta_dict
+        )
+        comment, _ = self.client.generate(user_prompt=formatted_prompt)
+        print(
+            f"Experiment summary has been generated! and the comment is as follows\n {comment}\n\n"
+        )
 
-    def _generate_conclusion(self):
+    def _generate_conclusion(self, trial_data, comment_history):
         """返回 json 格式"""
-        print(f"generating conclusion...")
-        pass
+        print(f"Start generating conclusion...\n")
+        meta_dict = {
+            **self.exp_config,
+            "trial_data": trial_data,
+            "comment_history": comment_history,
+        }
+        formatted_prompt = self.prompt_manager.format(
+            "generate_conclusion", **meta_dict
+        )
+        comment, _ = self.client.generate(user_prompt=formatted_prompt)
+        print(
+            f"Experiment summary has been generated! and the comment is as follows\n {comment}\n\n"
+        )
 
-    def generate_experiment_analysis(self):
+    def generate_experiment_analysis(
+        self,
+    ):
         """overview + summary + conclusion, 从 self 里面拿，反正不是很多"""
         file_path = self.result_dir + "experiment_analysis.json"
-
+        trial_data = self._load_trial_data()
+        comment_history = concatenate_jsonl(self.comment_history_file_path)
         data_dict = {
-            "overview": self._generate_summary(),
-            "summary": self._generate_conclusion(),
+            "overview": self._generate_summary(trial_data, comment_history),
+            "summary": self._generate_conclusion(trial_data, comment_history),
             "conclusion": self.conclusion,
         }
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data_dict, f, ensure_ascii=False, indent=4)
-
-
-# class O1Reasoner:
-#     pass

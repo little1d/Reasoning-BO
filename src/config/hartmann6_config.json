@@ -5,6 +5,13 @@
     "constraint": "No explicit constraints (variables are bound to [0, 1]).",
     "parameters_and_bounds": [
         {
+            "name": "x0",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
             "name": "x1",
             "bounds": [
                 0.0,
@@ -34,13 +41,6 @@
         },
         {
             "name": "x5",
-            "bounds": [
-                0.0,
-                1.0
-            ]
-        },
-        {
-            "name": "x6",
             "bounds": [
                 0.0,
                 1.0
