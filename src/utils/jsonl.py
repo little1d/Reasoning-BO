@@ -48,45 +48,19 @@ def add_to_jsonl(file_path, data):
 # ]
 
 
-def concatenate_jsonl(file_path):
+def concatenate_jsonl(json_data):
     # TODO
-    """拼接 comment_history 需要用到，将 jsonl 组织成一整块用于输入 llm"""
-    # 使用示例
-    # file_path = 'data.jsonl'
-    # concatenated_data = concatenate_jsonl(file_path)
-
-    # 效果
-    # jsonl
-    # [
-    #     {
-    #         "trial_index": 1,
-    #         "comment": "hello!",
-    #     },
-    #     {
-    #         "trial_index": 2,
-    #         "comment": "fuck!",
-    #     },
-    # ]
-    # file_path = "./test.json"
-    # print(concatenate_jsonl(file_path=file_path))
-    # trial_index: 1:
-    # comment: hello!
-    # trial_index: 2:
-    # comment: fuck!
+    """接受解析后的 JSON 对象列表，并进行拼接"""
     final_concatenated_data = []
 
-    # Read each line in JSONL file
-    with open(file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
+    for entry in json_data:
+        # Extract keys dynamically
+        entry_parts = []
+        for key, value in entry.items():
+            entry_parts.append(f"{key}: {value}")
 
-        for entry in data:
-            # Extract keys dynamically
-            entry_parts = []
-            for key, value in entry.items():
-                entry_parts.append(f"{key}: {value}")
-
-            # Join entry parts and add to the final output
-            final_concatenated_data.append(":\n".join(entry_parts))
+        # Join entry parts and add to the final output
+        final_concatenated_data.append(":\n".join(entry_parts))
 
     # Concatenate all data with newlines
     concatenated_output = "\n".join(final_concatenated_data)

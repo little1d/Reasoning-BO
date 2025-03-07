@@ -117,7 +117,7 @@ class DSReasoner:
 
     def _load_trial_data(self):
         """Load trial data from multiple CSV files as a combined string"""
-        csv_files = glob.glob(os.path.join(self.trial_data_dir), "*.csv")
+        csv_files = glob.glob(os.path.join((self.trial_data_dir), "*.csv"))
         combined_data = []
         for file_path in csv_files:
             with open(file_path, 'r', encoding='utf-8') as file:
@@ -135,7 +135,7 @@ class DSReasoner:
         self.client.save_messages(self.messages_file_path)
 
     def _extract_candidates_from_comment(self, comment, n: int = 5):
-        """返回置信度最高的 n 个 candidates"""
+        """输入 comment(json)，返回置信度最高的 n 个 candidates"""
         CONFIDENCE_ORDER = {"high": 0, "medium": 1, "low": 2}
         # json to dict
         comment = json.loads(comment)
@@ -216,11 +216,17 @@ class DSReasoner:
         # 加载 trial data， dir（self.trial_data_dir） 下面包含所有的 metrics.csv 文件
         trial_data = self._load_trial_data()
         # 加载 comment history   self.comment_history_file_path  是一个 jsonl 文件，可以通过concatenate_jsonl函数拼接 comment_history
-        comment_history = concatenate_jsonl(self.comment_history_file_path)
+
+        with open(self.comment_history_file_path, 'r', encoding='utf-8') as f:
+            # 逐行读取并解析JSONL文件
+            comment_history = [json.loads(line) for line in f]
+
+        # 将解析后的JSON对象列表传递给concatenate_jsonl
+        comment_history = concatenate_jsonl(comment_history)
         # 利用 prompt_template 生成 prompt。并使用dsreasoner.generate 生成 comment
         condidates_array = []
         try:
-            print(f"Start Optimizatoin iteration{trial.index}...")
+            print(f"Start Optimization iteration {trial.index}...")
             # 把trial data, comment history 拼接到 meta_dict 中
             meta_dict = {
                 **self.exp_config,
