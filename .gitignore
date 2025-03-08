@@ -14,6 +14,9 @@ playground/
 # Tracking
 swanlog/
 
+# Experiment result
+/data/hartmann6_result
+
 # OS specific
 .DS_Store
 

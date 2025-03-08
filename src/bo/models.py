@@ -23,6 +23,7 @@ import json
 from src.config import Config
 from typing import Dict
 import os
+import re
 import glob
 
 from src.prompts.base import PromptManager
@@ -138,6 +139,11 @@ class DSReasoner:
 
     def _extract_candidates_from_comment(self, comment, n: int = 5):
         """输入 comment(json)，返回置信度最高的 n 个 candidates"""
+        comment = comment.strip()
+        comment = re.sub(
+            r'^```json\s*|\s*```$', '', comment, flags=re.MULTILINE
+        )
+
         CONFIDENCE_ORDER = {"high": 0, "medium": 1, "low": 2}
         # json to dict
         comment = json.loads(comment)
