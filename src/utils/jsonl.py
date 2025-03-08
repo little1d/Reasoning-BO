@@ -54,7 +54,6 @@ def concatenate_jsonl(json_data):
     final_concatenated_data = []
 
     for entry in json_data:
-        # Extract keys dynamically
         entry_parts = []
         for key, value in entry.items():
             entry_parts.append(f"{key}: {value}")

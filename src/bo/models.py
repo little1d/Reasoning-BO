@@ -18,7 +18,7 @@ import numpy as np
 import json
 from ax.plot.trace import optimization_trace_single_method
 from ax.utils.notebook.plotting import render
-from ax import Trial
+from ax import Trial, Arm, GeneratorRun
 import json
 from src.config import Config
 from typing import Dict
@@ -100,7 +100,7 @@ class DSReasoner:
             self.result_dir + "comment_history.jsonl"
         )
         self.experiment_analysis_file_path = (
-            self.result_dir + "experiment_analysis.json"
+            self.result_dir + "experiment_analysis.jsonl"
         )
         # ---------------------------------- Object instance----------------------------------
         self.client = DeepSeekClient()
@@ -127,9 +127,11 @@ class DSReasoner:
     def _save_comment(self, trial_index: int) -> None:
         # 初始化没有comment，comment 是 str，需要转换成 json
         """保存返回的 comment（DSReasoner 的 Assitant 信息） 到 comment history 中，jsonl 格式"""
+        print(f"Start saving the comment data for this round of trials\n")
         new_comment = self.client.messages[-1]['content']  # json
         data = {"trial_index": trial_index, "comment": new_comment}  # dict
         add_to_jsonl(self.comment_history_file_path, data)
+        print("Done!\n")
 
     def _save_messages(self):
         self.client.save_messages(self.messages_file_path)
@@ -160,6 +162,25 @@ class DSReasoner:
                     return candidates
         # 如果可用点不足 n 个，全部返回
         return candidates
+
+    def run_bo_experiment(self, experiment, candidates_array):
+        """运行一轮实验，包括创建 trial、运行和标记完成"""
+        candidates = [Arm(parameters=params) for params in candidates_array]
+        filtered_generator_run = GeneratorRun(arms=candidates)
+        trial = experiment.new_batch_trial(
+            generator_run=filtered_generator_run
+        )
+        trial.run()
+        trial.mark_completed()
+        return trial
+
+    def _save_experiment_data(self, experiment, trial: Trial) -> None:
+        """保存实验数据，包括 comment, messages 和 trial_data"""
+        self._save_comment(trial_index=trial.index)
+        self._save_messages()
+        save_trial_data(
+            experiment=experiment, trial=trial, save_dir=self.trial_data_dir
+        )
 
     def generate_overview(self) -> str:
         try:
@@ -206,13 +227,19 @@ class DSReasoner:
             return ""
 
     def optimization_first_round(self, comment):
-        # 第一轮并没有 Trial，所以不保存任何数据，单独处理！
+        # 第一轮并没有 Trial，所以 optimization 中不保存任何数据，单独处理！在外面运行完实验后动态保存
         candidates = self._extract_candidates_from_comment(comment)
         return candidates
 
-    def optimization_loop(self, experiment, trial: Trial) -> str:
+    def optimization_loop(
+        self, experiment, trial: Trial, bo_model: BOModel
+    ) -> str:
         """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
         """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment，并返回 candidates_array"""
+        # 获取BO模型推荐的点
+        generator_run_by_bo = bo_model.gen(n=10)
+        bo_candidates = [arm.parameters for arm in generator_run_by_bo.arms]
+
         # 加载 trial data， dir（self.trial_data_dir） 下面包含所有的 metrics.csv 文件
         trial_data = self._load_trial_data()
         # 加载 comment history   self.comment_history_file_path  是一个 jsonl 文件，可以通过concatenate_jsonl函数拼接 comment_history
@@ -226,13 +253,14 @@ class DSReasoner:
         # 利用 prompt_template 生成 prompt。并使用dsreasoner.generate 生成 comment
         condidates_array = []
         try:
-            print(f"Start Optimization iteration {trial.index}...")
+            print(f"Start Optimization iteration {trial.index + 1}...")
             # 把trial data, comment history 拼接到 meta_dict 中
             meta_dict = {
                 **self.exp_config,
                 "iteration": trial.index,
                 "trial_data": trial_data,
                 "comment_history": comment_history,
+                "bo_recommendations": bo_candidates,
             }  # 待完善
             # 利用 prompt template "optimization loop" 生成 formatted_prompt
             formatted_prompt = self.prompt_manager.format(
@@ -251,11 +279,7 @@ class DSReasoner:
             return ""
 
         # 保存数据
-        save_trial_data(
-            experiment=experiment, trial=trial, save_dir=self.trial_data_dir
-        )
-        self._save_comment(trial_index=trial.index)
-        self._save_messages()
+        self._save_experiment_data(experiment=experiment, trial=trial)
 
         # 从comment中抽象candidates_array 并 return
         return condidates_array
@@ -265,6 +289,7 @@ class DSReasoner:
         print(f"Start generating summary...\n")
         meta_dict = {
             **self.exp_config,
+            "iteration": len(comment_history),
             "trial_data": trial_data,
             "comment_history": comment_history,
         }
@@ -275,12 +300,16 @@ class DSReasoner:
         print(
             f"Experiment summary has been generated! and the comment is as follows\n {comment}\n\n"
         )
+        self.summary = comment
+        self._save_messages()
+        return comment
 
     def _generate_conclusion(self, trial_data, comment_history):
         """返回 json 格式"""
         print(f"Start generating conclusion...\n")
         meta_dict = {
             **self.exp_config,
+            "iteration": len(comment_history),
             "trial_data": trial_data,
             "comment_history": comment_history,
         }
@@ -291,6 +320,10 @@ class DSReasoner:
         print(
             f"Experiment summary has been generated! and the comment is as follows\n {comment}\n\n"
         )
+        self.conclusion = comment
+        # 作为调试，看看user_input
+        self._save_messages()
+        return comment
 
     def generate_experiment_analysis(
         self,
@@ -298,11 +331,18 @@ class DSReasoner:
         """overview + summary + conclusion, 从 self 里面拿，反正不是很多"""
         file_path = self.result_dir + "experiment_analysis.json"
         trial_data = self._load_trial_data()
-        comment_history = concatenate_jsonl(self.comment_history_file_path)
-        data_dict = {
-            "overview": self._generate_summary(trial_data, comment_history),
-            "summary": self._generate_conclusion(trial_data, comment_history),
-            "conclusion": self.conclusion,
+        with open(self.comment_history_file_path, 'r', encoding='utf-8') as f:
+            # 逐行读取并解析JSONL文件
+            comment_history = [json.loads(line) for line in f]
+
+        # 将解析后的JSON对象列表传递给concatenate_jsonl
+        comment_history = concatenate_jsonl(comment_history)
+        analysis = {
+            "overview": self.overview,
+            "summary": self._generate_summary(trial_data, comment_history),
+            "conclusion": self._generate_conclusion(
+                trial_data, comment_history
+            ),
         }
         with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(data_dict, f, ensure_ascii=False, indent=4)
+            json.dump(analysis, f, ensure_ascii=False, indent=4)
