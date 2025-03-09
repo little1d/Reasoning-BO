@@ -119,12 +119,13 @@ class DSReasoner:
 
     def _load_trial_data(self):
         """Load trial data from multiple CSV files as a combined string"""
-        print("Start Loading trial data from multiple CSV files as a combined string\n")
+        print("Start Loading trial data from multiple CSV files as a combined string")
         csv_files = glob.glob(os.path.join((self.trial_data_dir), "*.csv"))
         combined_data = []
         for file_path in csv_files:
             with open(file_path, 'r', encoding='utf-8') as file:
                 combined_data.append(file.read())
+        print("Done!\n")
         return "\n".join(combined_data)
 
     def _save_comment(self, trial_index: int) -> None:
@@ -258,15 +259,23 @@ class DSReasoner:
         # 加载 comment history   self.comment_history_file_path  是一个 jsonl 文件，可以通过concatenate_jsonl函数拼接 comment_history
 
         with open(self.comment_history_file_path, 'r', encoding='utf-8') as f:
-            # 逐行读取并解析JSONL文件
-            comment_history = [json.loads(line) for line in f]
+            comment_history = []
+            for line_number, line in enumerate(f, 1):
+                stripped_line = line.strip()
+                # 跳过空行
+                if not stripped_line:
+                    continue
+                try:
+                    comment_history.append(json.loads(stripped_line))
+                except json.JSONDecodeError as e:
+                    print(f"第{line_number}行解析失败，内容：{stripped_line[:50]}...，错误类型：{e.msg}")
 
         # 将解析后的JSON对象列表传递给concatenate_jsonl
         comment_history = concatenate_jsonl(comment_history)
         # 利用 prompt_template 生成 prompt。并使用dsreasoner.generate 生成 comment
         condidates_array = []
         try:
-            print(f"Start Optimization iteration {trial.index + 1}...")
+            print(f"Start Optimization iteration {trial.index}...")
             # 把trial data, comment history 拼接到 meta_dict 中
             meta_dict = {
                 **self.exp_config,
@@ -274,7 +283,7 @@ class DSReasoner:
                 "trial_data": trial_data,
                 "comment_history": comment_history,
                 "bo_recommendations": bo_candidates,
-            }  # 待完善
+            }  
             # 利用 prompt template "optimization loop" 生成 formatted_prompt
             formatted_prompt = self.prompt_manager.format(
                 "optimization_loop", **meta_dict
