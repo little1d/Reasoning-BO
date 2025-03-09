@@ -15,7 +15,9 @@ playground/
 swanlog/
 
 # Experiment result
-/data/hartmann6_result
+/data/
+swanlog/
+slurm-*.out
 
 # OS specific
 .DS_Store

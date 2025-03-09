@@ -52,6 +52,7 @@ class BOModel:
             trial.mark_completed()
 
     def gen(self, n):
+        print(f"Start use bo algorithms to generate bo_recommendations candidates...")
         self.model_bridge = Models.BOTORCH_MODULAR(
             experiment=self.experiment,
             data=self.experiment.fetch_data(),
@@ -62,7 +63,7 @@ class BOModel:
             ),
             botorch_acqf_class=qLogNoisyExpectedImprovement,
         )
-        print(f"Running BO trial ...")
+        
 
         return self.model_bridge.gen(n=n)
 
@@ -118,6 +119,7 @@ class DSReasoner:
 
     def _load_trial_data(self):
         """Load trial data from multiple CSV files as a combined string"""
+        print("Start Loading trial data from multiple CSV files as a combined string\n")
         csv_files = glob.glob(os.path.join((self.trial_data_dir), "*.csv"))
         combined_data = []
         for file_path in csv_files:
@@ -139,6 +141,7 @@ class DSReasoner:
 
     def _extract_candidates_from_comment(self, comment, n: int = 5):
         """输入 comment(json)，返回置信度最高的 n 个 candidates"""
+        print("Start extracting candidates array from comment\n")
         comment = comment.strip()
         comment = re.sub(
             r'^```json\s*|\s*```$', '', comment, flags=re.MULTILINE
@@ -171,6 +174,7 @@ class DSReasoner:
 
     def run_bo_experiment(self, experiment, candidates_array):
         """运行一轮实验，包括创建 trial、运行和标记完成"""
+        print("Start running bo experiment...\n")
         candidates = [Arm(parameters=params) for params in candidates_array]
         filtered_generator_run = GeneratorRun(arms=candidates)
         trial = experiment.new_batch_trial(
@@ -178,15 +182,18 @@ class DSReasoner:
         )
         trial.run()
         trial.mark_completed()
+        print("Done!\n")
         return trial
 
     def _save_experiment_data(self, experiment, trial: Trial) -> None:
         """保存实验数据，包括 comment, messages 和 trial_data"""
+        print("Start saving the experiment data, including comment, messages and trial data...\n")
         self._save_comment(trial_index=trial.index)
         self._save_messages()
         save_trial_data(
             experiment=experiment, trial=trial, save_dir=self.trial_data_dir
         )
+        print("Done!\n")
 
     def generate_overview(self) -> str:
         try:
@@ -201,7 +208,7 @@ class DSReasoner:
             self.overview = content
 
             print(
-                f"Overview has been generated! and the content is as follows\n {content}"
+                f"Overview has been generated! and the content is as follows\n {content}\n"
             )
             return content
 
@@ -335,6 +342,7 @@ class DSReasoner:
         self,
     ):
         """overview + summary + conclusion, 从 self 里面拿，反正不是很多"""
+        print("Start generating experiment analysis..., conluding overview, experiment summary and conclusion. \n")
         file_path = self.result_dir + "experiment_analysis.json"
         trial_data = self._load_trial_data()
         with open(self.comment_history_file_path, 'r', encoding='utf-8') as f:
@@ -352,3 +360,4 @@ class DSReasoner:
         }
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(analysis, f, ensure_ascii=False, indent=4)
+        print("Done!\n")
