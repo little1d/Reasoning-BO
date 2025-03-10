@@ -64,7 +64,7 @@ class BOModel:
             botorch_acqf_class=qLogNoisyExpectedImprovement,
         )
         
-
+        print("Done!\n")
         return self.model_bridge.gen(n=n)
 
     def easy_render_hartmann6(self):
@@ -142,7 +142,7 @@ class DSReasoner:
 
     def _extract_candidates_from_comment(self, comment, n: int = 5):
         """输入 comment(json)，返回置信度最高的 n 个 candidates"""
-        print("Start extracting candidates array from comment\n")
+        print("Start extracting candidates array from comment...")
         comment = comment.strip()
         comment = re.sub(
             r'^```json\s*|\s*```$', '', comment, flags=re.MULTILINE
@@ -169,8 +169,10 @@ class DSReasoner:
                     continue
                 candidates.append(point)
                 if len(candidates) == n:
+                    print(f"Done! We have collected {n} candidates, The candidates points is as follows{candidates}")
                     return candidates
         # 如果可用点不足 n 个，全部返回
+        print(f"Done! We have collected candidates less than {n}. The candidates points is as follows{candidates}")
         return candidates
 
     def run_bo_experiment(self, experiment, candidates_array):
@@ -283,7 +285,7 @@ class DSReasoner:
                 "trial_data": trial_data,
                 "comment_history": comment_history,
                 "bo_recommendations": bo_candidates,
-            }  
+            }
             # 利用 prompt template "optimization loop" 生成 formatted_prompt
             formatted_prompt = self.prompt_manager.format(
                 "optimization_loop", **meta_dict

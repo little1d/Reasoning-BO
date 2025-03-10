@@ -51,6 +51,7 @@ def add_to_jsonl(file_path, data):
 def concatenate_jsonl(json_data):
     # TODO
     """接受解析后的 JSON 对象列表，并进行拼接"""
+    print("Start concatenating comment jsonl...")
     final_concatenated_data = []
 
     for entry in json_data:
@@ -63,5 +64,5 @@ def concatenate_jsonl(json_data):
 
     # Concatenate all data with newlines
     concatenated_output = "\n".join(final_concatenated_data)
-
+    print("Done!\n")
     return concatenated_output
