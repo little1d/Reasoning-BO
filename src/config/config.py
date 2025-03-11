@@ -23,8 +23,7 @@ class Config:
         self.DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
         self.DEEPSEEK_API_BASE = os.getenv("DEEPSEEK_API_BASE")
         self.DEEPSEEK_MODEL_NAME = os.getenv("DEEPSEEK_MODEL_NAME")
-        self.NEO4J_URL = "bolt://10.140.52.87:7687"
-        self.NEO4J_USERNAME = "neo4j"
-        self.NEO4J_PASSWORD = "123456789"
-        self.MILVUS_HOST = "10.140.52.87"
-        self.MILVUS_PORT = "19530"
+        self.NEO4J_URL = os.getenv("NEO4J_URL")
+        self.NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+        self.NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+        self.MILVUS_URL = os.getenv("MILVUS_URL")
