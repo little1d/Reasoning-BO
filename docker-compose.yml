@@ -64,6 +64,8 @@ services:
     restart: always
     environment:
       NEO4J_AUTH: neo4j/123456789  
+      NEO4JLABS_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
     ports:
       - "7474:7474"  
       - "7687:7687"  # Bolt协议端口
@@ -72,6 +74,8 @@ services:
       - ./logs:/var/lib/neo4j/logs
       - ./plugins:/plugins
       - ./conf:/var/lib/neo4j/conf
+      - ./plugins:/plugins
+      - ./import:/var/lib/neo4j/import
     networks:
       - default
   
