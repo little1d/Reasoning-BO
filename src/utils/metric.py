@@ -42,8 +42,13 @@ def save_trial_data(
         "arms_parameters": [
             {
                 "arm_name": arm.name,
+                # 如果 arm 为 float 或 int，得到保留三位小数的值；如果是其他类型直接返回 value。再序列解包
                 **{
-                    key: round(value, 3)
+                    key: (
+                        round(value, 3)
+                        if isinstance(value, (float, int))
+                        else value
+                    )
                     for key, value in arm.parameters.items()
                 },
             }

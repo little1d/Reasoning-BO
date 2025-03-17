@@ -1,54 +1,74 @@
 {
-    "name": "Bayesian Optimization on Hartmann6",
-    "domain": "Global Optimization",
-    "description": "Minimize the 6-dimensional Hartmann6 function using Bayesian optimization. The function is synthetic, multimodal, and widely used as a benchmark for black-box optimization algorithms.",
-    "constraint": "No explicit constraints (variables are bound to [0, 1]).",
+    "name": "Suzuki Reaction Optimization",
+    "domain": "Organic Chemistry - Cross Coupling Reactions",
+    "description": "Optimization of Suzuki cross-coupling reaction to enhance reaction yield by exploring different electrophiles, nucleophiles, ligands, bases, and solvents.",
+    "constraint": "Reagents must be compatible with each other and reaction conditions must ensure stability of intermediates.",
     "parameters_and_bounds": [
         {
-            "name": "x0",
+            "name": "Electrophile_SMILES",
+            "description": "SMILES representation of the electrophilic substrate",
             "bounds": [
-                0.0,
-                1.0
-            ]
+                "BrC1=CC=C(N=CC=C2)C2=C1",
+                "ClC1=CC=C(N=CC=C2)C2=C1",
+                "IC1=CC=C(N=CC=C2)C2=C1",
+                "O=S(OC1=CC=C(N=CC=C2)C2=C1)(C(F)(F)F)=O"
+            ],
+            "type": "discrete"
         },
         {
-            "name": "x1",
+            "name": "Nucleophile_SMILES",
+            "description": "SMILES representation of the nucleophilic substrate",
             "bounds": [
-                0.0,
-                1.0
-            ]
+                "CC1=CC=C(N(C2CCCCO2)N=C3)C3=C1[B-](F)(F)F",
+                "CC1=CC=C(N(C2CCCCO2)N=C3)C3=C1B(O)O",
+                "CC1=CC=C(N(C2CCCCO2)N=C3)C3=C1B4OC(C)(C)C(C)(C)O4"
+            ],
+            "type": "discrete"
         },
         {
-            "name": "x2",
+            "name": "Ligand_SMILES",
+            "description": "SMILES representation of the ligand used in the reaction",
             "bounds": [
-                0.0,
-                1.0
-            ]
+                "[c-]1(P(C2=CC=CC=C2)C3=CC=CC=C3)cccc1.[c-]4(P(C5=CC=CC=C5)C6=CC=CC=C6)cccc4.[Fe+2]",
+                "CC(C)(C)P(C(C)(C)C)C1=CC=C(N(C)C)C=C1",
+                "CC(C1=C(C2=CC=CC=C2P(C3CCCCC3)C4CCCCC4)C(C(C)C)=CC(C(C)C)=C1)C",
+                "CC(P(C(C)(C)C)C(C)(C)C)(C)C",
+                "CC1(C)C2=C(OC3=C1C=CC=C3P(C4=CC=CC=C4)C5=CC=CC=C5)C(P(C6=CC=CC=C6)C7=CC=CC=C7)=CC=C2",
+                "CC1=CC=CC=C1P(C2=CC=CC=C2C)C3=CC=CC=C3C",
+                "CCCCP(C12C[C@@H]3C[C@@H](C[C@H](C2)C3)C1)C45C[C@H]6C[C@@H](C5)C[C@@H](C4)C6",
+                "COC1=CC=CC(OC)=C1C2=C(P(C3CCCCC3)C4CCCCC4)C=CC=C2",
+                "P(C1=CC=CC=C1)(C2=CC=CC=C2)C3=CC=CC=C3",
+                "P(C1CCCCC1)(C2CCCCC2)C3CCCCC3"
+            ],
+            "type": "discrete"
         },
         {
-            "name": "x3",
+            "name": "Base_SMILES",
+            "description": "SMILES representation of the base used in the reaction",
             "bounds": [
-                0.0,
-                1.0
-            ]
+                "[Cs+].[F-]",
+                "[K+].[OH-]",
+                "[Na+].[OH-]",
+                "CC([O-])C.[Li+]",
+                "CCN(CC)CC",
+                "O=P([O-])([O-])[O-].[K+].[K+].[K+]",
+                "OC([O-])=O.[Na+]"
+            ],
+            "type": "discrete"
         },
         {
-            "name": "x4",
+            "name": "Solvent_SMILES",
+            "description": "SMILES representation of the solvent used in the reaction",
             "bounds": [
-                0.0,
-                1.0
-            ]
-        },
-        {
-            "name": "x5",
-            "bounds": [
-                0.0,
-                1.0
-            ]
+                "C1COCC1",
+                "CO",
+                "N#CC"
+            ],
+            "type": "discrete"
         }
     ],
     "target": {
-        "name": "",
-        "description": ""
+        "name": "yield",
+        "description": "Maximize the yield of the Suzuki cross-coupling reaction"
     }
 }

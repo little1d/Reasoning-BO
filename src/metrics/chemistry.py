@@ -9,6 +9,8 @@ r"""
     adapted from https://github.com/facebook/Ax/blob/main/ax/metrics/chemistry.py
 """
 
+from __future__ import annotations
+
 """
 Classes for optimizing yields from chemical reactions.
 
@@ -33,7 +35,6 @@ as well as the temperature and concentration for a direct arylation reaction.
 See _[Shields2021] for details.
 """
 
-from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
@@ -68,7 +69,12 @@ class ChemistryData:
 
 @lru_cache(maxsize=8)
 def _get_data(problem_type: ChemistryProblemType) -> ChemistryData:
-    file_path = Path(__file__).parent.joinpath("chemistry_data.zip").absolute()
+    file_path = (
+        Path(__file__)
+        .parent.parent.parent.joinpath("data/chemistry_data.zip")
+        .absolute()
+    )
+
     with ZipFile(file_path) as zf:
         with zf.open(f"{problem_type.value}.csv") as f:
             df = pd.read_csv(f, index_col=0)
