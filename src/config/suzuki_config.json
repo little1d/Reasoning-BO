@@ -1,0 +1,54 @@
+{
+    "name": "Bayesian Optimization on Hartmann6",
+    "domain": "Global Optimization",
+    "description": "Minimize the 6-dimensional Hartmann6 function using Bayesian optimization. The function is synthetic, multimodal, and widely used as a benchmark for black-box optimization algorithms.",
+    "constraint": "No explicit constraints (variables are bound to [0, 1]).",
+    "parameters_and_bounds": [
+        {
+            "name": "x0",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "name": "x1",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "name": "x2",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "name": "x3",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "name": "x4",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "name": "x5",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        }
+    ],
+    "target": {
+        "name": "",
+        "description": ""
+    }
+}

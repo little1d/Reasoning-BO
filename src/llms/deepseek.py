@@ -7,7 +7,7 @@ config = Config()
 
 
 class DeepSeekClient:
-    """不同的 generate 方法不能混用！声明一个 client 就只能用一种方法"""
+    """不同的 generate 方法不能混用！声明一个 client 就只能用一种 generate 方法"""
 
     def __init__(self):
         self.client = OpenAI(

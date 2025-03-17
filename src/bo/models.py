@@ -52,7 +52,9 @@ class BOModel:
             trial.mark_completed()
 
     def gen(self, n):
-        print(f"Start use bo algorithms to generate bo_recommendations candidates...")
+        print(
+            f"Start use bo algorithms to generate bo_recommendations candidates..."
+        )
         self.model_bridge = Models.BOTORCH_MODULAR(
             experiment=self.experiment,
             data=self.experiment.fetch_data(),
@@ -63,7 +65,7 @@ class BOModel:
             ),
             botorch_acqf_class=qLogNoisyExpectedImprovement,
         )
-        
+
         print("Done!\n")
         return self.model_bridge.gen(n=n)
 
@@ -119,7 +121,9 @@ class DSReasoner:
 
     def _load_trial_data(self):
         """Load trial data from multiple CSV files as a combined string"""
-        print("Start Loading trial data from multiple CSV files as a combined string")
+        print(
+            "Start Loading trial data from multiple CSV files as a combined string"
+        )
         csv_files = glob.glob(os.path.join((self.trial_data_dir), "*.csv"))
         combined_data = []
         for file_path in csv_files:
@@ -169,10 +173,14 @@ class DSReasoner:
                     continue
                 candidates.append(point)
                 if len(candidates) == n:
-                    print(f"Done! We have collected {n} candidates, The candidates points is as follows{candidates}")
+                    print(
+                        f"Done! We have collected {n} candidates, The candidates points is as follows{candidates}"
+                    )
                     return candidates
         # 如果可用点不足 n 个，全部返回
-        print(f"Done! We have collected candidates less than {n}. The candidates points is as follows{candidates}")
+        print(
+            f"Done! We have collected candidates less than {n}. The candidates points is as follows{candidates}"
+        )
         return candidates
 
     def run_bo_experiment(self, experiment, candidates_array):
@@ -190,7 +198,9 @@ class DSReasoner:
 
     def _save_experiment_data(self, experiment, trial: Trial) -> None:
         """保存实验数据，包括 comment, messages 和 trial_data"""
-        print("Start saving the experiment data, including comment, messages and trial data...\n")
+        print(
+            "Start saving the experiment data, including comment, messages and trial data...\n"
+        )
         self._save_comment(trial_index=trial.index)
         self._save_messages()
         save_trial_data(
@@ -270,7 +280,9 @@ class DSReasoner:
                 try:
                     comment_history.append(json.loads(stripped_line))
                 except json.JSONDecodeError as e:
-                    print(f"第{line_number}行解析失败，内容：{stripped_line[:50]}...，错误类型：{e.msg}")
+                    print(
+                        f"第{line_number}行解析失败，内容：{stripped_line[:50]}...，错误类型：{e.msg}"
+                    )
 
         # 将解析后的JSON对象列表传递给concatenate_jsonl
         comment_history = concatenate_jsonl(comment_history)
@@ -353,7 +365,9 @@ class DSReasoner:
         self,
     ):
         """overview + summary + conclusion, 从 self 里面拿，反正不是很多"""
-        print("Start generating experiment analysis..., conluding overview, experiment summary and conclusion. \n")
+        print(
+            "Start generating experiment analysis..., conluding overview, experiment summary and conclusion. \n"
+        )
         file_path = self.result_dir + "experiment_analysis.json"
         trial_data = self._load_trial_data()
         with open(self.comment_history_file_path, 'r', encoding='utf-8') as f:
