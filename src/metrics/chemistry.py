@@ -130,23 +130,41 @@ class ChemistryMetric(Metric):
             data = _get_data(self.problem_type)
             arm_names = []
             mean = []
+            sem = []
+            trial_indices = []
 
             # Filter arms with valid parameters
             for name, arm in trial.arms_by_name.items():
                 try:
-                    arm_names.append(name)
                     val = data.evaluate(params=arm.parameters)
+                    arm_names.append(name)
                     mean.append(val)
+                    sem.append(noise_sd)
+                    trial_indices.append(trial.index)
                 except KeyError:
                     # Skip arms with missing data
                     continue
+
+            if not arm_names:
+                return Err(
+                    MetricFetchE(
+                        message=f"No valid arms found for {self.name}",
+                        exception=ValueError("All arms have missing data"),
+                    )
+                )
+
+            # Ensure all arrays have the same length
+            assert (
+                len(arm_names) == len(mean) == len(sem) == len(trial_indices)
+            ), "All arrays must have the same length"
+
             df = pd.DataFrame(
                 {
                     "arm_name": arm_names,
                     "metric_name": self.name,
                     "mean": mean,
-                    "sem": noise_sd,
-                    "trial_index": trial.index,
+                    "sem": sem,
+                    "trial_index": trial_indices,
                 }
             )
             return Ok(value=Data(df=df))

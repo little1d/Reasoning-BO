@@ -258,12 +258,12 @@ class DSReasoner:
         return candidates
 
     def optimization_loop(
-        self, experiment, trial: Trial, bo_model: BOModel
+        self, experiment, trial: Trial, bo_model: BOModel, n: int = 10
     ) -> str:
         """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
         """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment，并返回 candidates_array"""
         # 获取BO模型推荐的点
-        generator_run_by_bo = bo_model.gen(n=10)
+        generator_run_by_bo = bo_model.gen(n=n)
         bo_candidates = [arm.parameters for arm in generator_run_by_bo.arms]
 
         # 加载 trial data， dir（self.trial_data_dir） 下面包含所有的 metrics.csv 文件
