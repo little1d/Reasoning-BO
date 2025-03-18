@@ -130,10 +130,16 @@ class ChemistryMetric(Metric):
             data = _get_data(self.problem_type)
             arm_names = []
             mean = []
+
+            # Filter arms with valid parameters
             for name, arm in trial.arms_by_name.items():
-                arm_names.append(name)
-                val = data.evaluate(params=arm.parameters)
-                mean.append(val)
+                try:
+                    arm_names.append(name)
+                    val = data.evaluate(params=arm.parameters)
+                    mean.append(val)
+                except KeyError:
+                    # Skip arms with missing data
+                    continue
             df = pd.DataFrame(
                 {
                     "arm_name": arm_names,
