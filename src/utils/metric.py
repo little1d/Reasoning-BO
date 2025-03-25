@@ -120,12 +120,40 @@ def save_trial_data(
             writer.writerows(rows)
 
 
-def extract_metric(exp: Experiment, metric_name: str) -> np.ndarray:
+def extract_max_metric(exp: Experiment, metric_name: str) -> np.ndarray:
     """
-    提取实验对象中指定metric的均值序列，用于所有实验结束后，结果的展示。其实在 save_trial_data 函数中，会把
-    所有的 metrics 增量存储到 xxx_metric.csc 中，但那是以 arm 为最小单位的。对于 BatchTrial 来说，一个 Batch
-    里不同 arm 的 metric 值可能相差很大。针对最后结果绘图而言，取均值是很合理的，可以反映上一轮 sample 的 candidates 整体水平，
-    随着实验的进行，mean 理论上是逐渐升高的。
+    提取实验对象中指定metric的最大值序列，用于所有实验结束后，结果的展示。对于 BatchTrial 来说，取该批次的最大值，
+    这样可以更好地反映BO算法探索到的最高性能点。
+    参数：
+        exp: 实验对象
+        metric_name: 需要提取的指标名称（如'hartman6'），在 objective/constriant 中定义的"name"一样
+    返回：
+        np.ndarray: 按 trial_index 顺序排列的指标最大值数组
+        对于BatchTrial自动取该批次的最大值
+    """
+    # 获取原始数据并过滤目标指标
+    df = exp.fetch_data().df
+    metric_df = df[df['metric_name'] == metric_name]
+
+    # 按trial分组处理最大值
+    results = []
+    for trial_idx, group in metric_df.groupby('trial_index'):
+        # 判断是否为BatchTrial（依据每组arm数量）
+        if len(group) > 1:
+            batch_max = group['mean'].max()
+            results.append((trial_idx, batch_max))
+        else:
+            results.append((trial_idx, group['mean'].iloc[0]))
+
+    # 按trial顺序排列并转换为数组
+    sorted_results = sorted(results, key=lambda x: x[0])
+    return np.array([val for _, val in sorted_results])
+
+
+def extract_mean_metric(exp: Experiment, metric_name: str) -> np.ndarray:
+    """
+    提取实验对象中指定metric的均值序列，用于所有实验结束后，结果的展示。对于 BatchTrial 来说，取该批次的均值，
+    可以反映上一轮 sample 的 candidates 整体水平。
     参数：
         exp: 实验对象
         metric_name: 需要提取的指标名称（如'hartman6'），在 objective/constriant 中定义的"name"一样
