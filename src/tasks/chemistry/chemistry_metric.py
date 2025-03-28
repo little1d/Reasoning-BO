@@ -71,7 +71,7 @@ class ChemistryData:
 def _get_data(problem_type: ChemistryProblemType) -> ChemistryData:
     file_path = (
         Path(__file__)
-        .parent.parent.parent.joinpath("data/chemistry_data.zip")
+        .parent.parent.parent.parent.joinpath("data/chemistry_data.zip")
         .absolute()
     )
 
