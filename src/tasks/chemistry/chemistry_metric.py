@@ -175,3 +175,7 @@ class ChemistryMetric(Metric):
                     message=f"Failed to fetch {self.name}", exception=e
                 )
             )
+
+
+# ---------------------------------- use case ----------------------------------
+chem_metric = ChemistryMetric()
