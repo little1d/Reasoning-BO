@@ -178,4 +178,4 @@ class ChemistryMetric(Metric):
 
 
 # ---------------------------------- use case ----------------------------------
-chem_metric = ChemistryMetric()
+# chem_metric = ChemistryMetric()
