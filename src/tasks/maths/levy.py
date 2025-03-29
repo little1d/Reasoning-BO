@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 r"""
-@DATE: 2025-03-28 16:52:43
-@File: src/tasks/maths/ackley.py
+@DATE: 2025-03-28 18:48:28
+@File: src/tasks/maths/levy.py
 @IDE: vscode
 @Description:
-    Metric for evaluating Ackley synthetic function.
+    Metric for evaluating Levy synthetic function.
 """
 
 from __future__ import annotations
@@ -22,18 +22,15 @@ import pandas as pd
 import math
 
 
-class AckleyMetric(Metric):
-    """Metric for evaluating Ackley synthetic function.
+class LevyMetric(Metric):
+    """Metric for evaluating Levy synthetic function.
 
     Args:
         name: The name of the metric.
         noiseless: If True, consider observations noiseless, otherwise
             assume unknown Gaussian observation noise.
         lower_is_better: If True, the metric should be minimized.
-        dimension: Dimension of the Ackley function (default=2).
-        a: Parameter controlling depth of the basin (default=20).
-        b: Parameter controlling width of the basin (default=0.2).
-        c: Parameter controlling frequency of cosine term (default=2π).
+        dimension: Dimension of the Levy function (default=2).
     """
 
     def __init__(
@@ -42,43 +39,35 @@ class AckleyMetric(Metric):
         noiseless: bool = False,
         lower_is_better: bool = True,
         dimension: int = 2,
-        a: float = 20.0,
-        b: float = 0.2,
-        c: float = 2 * math.pi,
     ) -> None:
         self.noiseless = noiseless
         self.dimension = dimension
-        self.a = a
-        self.b = b
-        self.c = c
         super().__init__(name=name, lower_is_better=lower_is_better)
 
-    def clone(self) -> AckleyMetric:
+    def clone(self) -> LevyMetric:
         return self.__class__(
             name=self._name,
             noiseless=self.noiseless,
             lower_is_better=none_throws(self.lower_is_better),
             dimension=self.dimension,
-            a=self.a,
-            b=self.b,
-            c=self.c,
         )
 
-    def _evaluate_ackley(self, params: TParameterization) -> float:
-        """Evaluate Ackley function at given parameters."""
+    def _evaluate_levy(self, params: TParameterization) -> float:
+        """Evaluate Levy function at given parameters."""
         # Convert parameters to numpy array
         x = np.array([params[f"x{i+1}"] for i in range(self.dimension)])
+        w = 1 + (x - 1) / 4
 
-        # First exponential term
-        sum_sq = np.sum(x**2)
-        term1 = -self.a * np.exp(-self.b * np.sqrt(sum_sq / self.dimension))
+        # First term
+        term1 = np.sin(np.pi * w[0]) ** 2
 
-        # Second exponential term
-        sum_cos = np.sum(np.cos(self.c * x))
-        term2 = -np.exp(sum_cos / self.dimension)
+        # Middle terms
+        term2 = 0.0
+        for i in range(self.dimension - 1):
+            term2 += (w[i] - 1) ** 2 * (1 + 10 * np.sin(np.pi * w[i] + 1) ** 2)
 
-        # Constant terms
-        term3 = self.a + math.exp(1)
+        # Last term
+        term3 = (w[-1] - 1) ** 2 * (1 + np.sin(2 * np.pi * w[-1]) ** 2)
 
         return float(term1 + term2 + term3)
 
@@ -94,7 +83,7 @@ class AckleyMetric(Metric):
 
             for name, arm in trial.arms_by_name.items():
                 try:
-                    val = self._evaluate_ackley(arm.parameters)
+                    val = self._evaluate_levy(arm.parameters)
                     arm_names.append(name)
                     mean.append(val)
                     sem.append(noise_sd)
@@ -131,11 +120,10 @@ class AckleyMetric(Metric):
             )
 
 
-# ---------------------------------- Use Example ----------------------------------
-# 2D Ackley
-# acley_metric = AckleyMetric(name="ackley2d", dimension=2)
+# ---------------------------------- use case ----------------------------------
 
-# 10D Ackley with custom parameters
-# acley_metric_10D = AckleyMetric(
-#     name="ackley10D", dimension=10, a=15.0, b=0.1, c=3.0
-# )
+# 2D Levy
+# levy_metric = LevyMetric(name="levy2d")
+
+# 5D Levy
+# levy_metric_5d = LevyMetric(name="levy5d", dimension=5)
