@@ -34,100 +34,6 @@ def lunar_search_space():
             for i in range(12)
         ]
     )
-    # for faithful bo: meaningful parameter names
-    # return SearchSpace(
-    #     parameters=[
-    #         # 推进系统参数
-    #         RangeParameter(
-    #             name="main_engine_throttle",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="主发动机推力控制系数",
-    #         ),
-    #         RangeParameter(
-    #             name="side_engine_throttle",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="侧向发动机推力控制系数",
-    #         ),
-    #         # 控制增益参数
-    #         RangeParameter(
-    #             name="hover_control_gain",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="悬停控制PID增益",
-    #         ),
-    #         RangeParameter(
-    #             name="attitude_control_gain",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="姿态稳定控制增益",
-    #         ),
-    #         # 着陆机构参数
-    #         RangeParameter(
-    #             name="landing_leg_damping",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="着陆腿阻尼系数",
-    #         ),
-    #         RangeParameter(
-    #             name="safety_margin",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="着陆安全余量阈值",
-    #         ),
-    #         # 飞行限制参数
-    #         RangeParameter(
-    #             name="angular_rate_limit",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="最大允许角速度(rad/s)",
-    #         ),
-    #         RangeParameter(
-    #             name="vertical_speed_limit",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="最大垂直下降速度(m/s)",
-    #         ),
-    #         RangeParameter(
-    #             name="horizontal_speed_limit",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="最大水平速度(m/s)",
-    #         ),
-    #         # 辅助系统参数
-    #         RangeParameter(
-    #             name="velocity_smoothing",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="速度测量平滑因子",
-    #         ),
-    #         RangeParameter(
-    #             name="fuel_consumption_factor",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="燃料消耗率调整系数",
-    #         ),
-    #         RangeParameter(
-    #             name="emergency_override",
-    #             parameter_type=ParameterType.FLOAT,
-    #             lower=0.0,
-    #             upper=1.0,
-    #             description="紧急控制切换阈值",
-    #         ),
-    #     ]
-    # )
 
 
 @pytest.fixture
@@ -164,6 +70,7 @@ def test_metric_evaluation(lunar_search_space):
     )
     trial = exp.new_trial().add_arm(Arm(parameters=params))
     data = metric.fetch_trial_data(trial)
+    print(data)
     assert data.is_ok()
 
 
@@ -176,6 +83,7 @@ def test_full_optimization(lunar_search_space, lunar_optimization_config):
         runner=MyRunner(),
         optimization_config=lunar_optimization_config,
     )
+    print(exp.fetch_trials_data)
 
     from src.bo.models import BOModel
 

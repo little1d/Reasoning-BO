@@ -61,7 +61,7 @@ class LunarLanderMetric(Metric):
                     val = self._evaluate_lander(arm.parameters)
                     arm_names.append(name)
                     mean.append(val)
-                    # sem.append(0.0)  # Noiseless evaluation
+                    sem.append(0.0)  # Noiseless evaluation
                     trial_indices.append(trial.index)
                 except (KeyError, ValueError):
                     continue
