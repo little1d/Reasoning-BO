@@ -131,4 +131,4 @@ class Hartmann6Metric(Metric):
 
 # ---------------------------------- use case ----------------------------------
 
-# hartmann6_metric = Hartmann6Metric()
+# hartmann6_metric = Hartmann6Metric(dimension=2)
