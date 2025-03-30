@@ -9,7 +9,8 @@
 
 # Debug
 **/.pytest_cache/
-playground/
+playground/*
+!playground/prompts/
 
 # Tracking
 swanlog/
