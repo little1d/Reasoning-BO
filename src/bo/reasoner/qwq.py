@@ -42,6 +42,7 @@ class QWQReasoner:
         self.overview = ""
         self.summary = ""
         self.conclusion = ""
+        self.keywords = ""
 
     def _load_config(self, path: str) -> Dict:
         with open(path, 'r', encoding='utf-8') as f:
@@ -71,6 +72,46 @@ class QWQReasoner:
 
     def _save_messages(self):
         self.client.save_messages(self.messages_file_path)
+
+    def _extract_keywords_from_comment(self, comment: str):
+        """从comment中提取用于检索的关键词
+
+        Args:
+            comment: 包含keywords字段的JSON字符串
+
+        Returns:
+            提取到的关键词字符串，如果提取失败则返回空字符串
+        """
+        try:
+            comment = comment.strip()
+            # 移除可能的JSON代码块标记
+            comment = re.sub(
+                r'^```json\s*|\s*```$', '', comment, flags=re.MULTILINE
+            )
+
+            # 解析JSON
+            comment_data = json.loads(comment)
+
+            # 检查keywords字段是否存在且是字符串
+            if isinstance(comment_data, dict) and "keywords" in comment_data:
+                keywords = comment_data["keywords"]
+                if isinstance(keywords, str):
+                    return keywords.strip()
+                elif isinstance(keywords, (list, tuple)):
+                    return " ".join(str(k) for k in keywords).strip()
+
+            print(f"Warning: No valid 'keywords' field found in comment")
+            return ""
+
+        except json.JSONDecodeError:
+            print(f"Warning: Failed to parse comment as JSON")
+            return ""
+        except Exception as e:
+            print(f"Warning: Unexpected error extracting keywords - {str(e)}")
+            return ""
+
+    def get_keywords(self):
+        return self.keywords
 
     def _extract_candidates_from_comment(self, comment, n: int = 5):
         """输入 comment(json)，返回置信度最高的 n 个 candidates"""
@@ -186,7 +227,12 @@ class QWQReasoner:
         return candidates
 
     def optimization_loop(
-        self, experiment, trial: Trial, bo_model: BOModel, n: int = 10
+        self,
+        experiment,
+        trial: Trial,
+        bo_model: BOModel,
+        retrieval_context: str,
+        n: int = 10,
     ) -> str:
         """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
         """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment，并返回 candidates_array"""
@@ -225,6 +271,8 @@ class QWQReasoner:
                 "trial_data": trial_data,
                 "comment_history": comment_history,
                 "bo_recommendations": bo_candidates,
+                "retrieved_context": retrieval_context,
+                # TODO 在 commment 的模板中增加 retrieval_context 的部分
             }
             # 利用 prompt template "optimization loop" 生成 formatted_prompt
             formatted_prompt = self.prompt_manager.format(
@@ -234,6 +282,7 @@ class QWQReasoner:
             print(
                 f"Optimization loop iteration {trial.index} has done! and the comment is as follows\n {comment}\n\n"
             )
+            self.keywords = self._extract_keywords_from_comment(comment)
             condidates_array = self._extract_candidates_from_comment(comment)
 
         except Exception as e:
