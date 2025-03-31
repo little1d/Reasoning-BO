@@ -231,7 +231,7 @@ class QWQReasoner:
         experiment,
         trial: Trial,
         bo_model: BOModel,
-        retrieval_context: str,
+        retrieval_context: str = None,
         n: int = 10,
     ) -> str:
         """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
