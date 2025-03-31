@@ -224,6 +224,7 @@ class QWQReasoner:
     def optimization_first_round(self, comment):
         # 第一轮并没有 Trial，所以 optimization 中不保存任何数据，单独处理！在外面运行完实验后动态保存
         candidates = self._extract_candidates_from_comment(comment)
+        self.keywords = self._extract_keywords_from_comment(comment)
         return candidates
 
     def optimization_loop(

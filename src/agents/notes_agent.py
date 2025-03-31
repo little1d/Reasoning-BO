@@ -16,6 +16,7 @@ from okagents.agents.kg_agent import KGAgent
 from okagents.agents.milvus_agent import MilvusAgent
 import json
 from camel.messages import BaseMessage
+import re
 
 
 class BaseNotesResponse(BaseModel):
@@ -208,3 +209,79 @@ class NotesAgent:
             Structured response matching the provided model
         """
         return self.chat_agent.step(prompt, response_format=response_schema)
+
+    @staticmethod
+    # 与类相关，但是不依赖类或实例状态
+    def format_retrieved_notes(results: Dict[str, Any]) -> str:
+        """Format retrieved notes into a well-structured string with enhanced robustness
+
+        Args:
+            results: Dictionary containing retrieval results from knowledge graph and vector DB
+
+        Returns:
+            Formatted string with clearly categorized retrieval results
+        """
+        formatted = []
+
+        # Process knowledge graph results
+        if results.get("knowledge_graph"):
+            try:
+                formatted.append(
+                    "=== Retrieved_context from knowledge graph ==="
+                )
+                kg_relations = set()  # Using set for deduplication
+
+                # Extract and normalize knowledge graph relations
+                for relation in results["knowledge_graph"]:
+                    if isinstance(relation, str):
+                        # Extract key information from the relation
+                        match = re.search(
+                            r"Node (.+?) \(.*?\) has relationship (.+?) with Node (.+?) \(",
+                            relation,
+                        )
+                        if match:
+                            entity1, rel_type, entity2 = match.groups()
+                            kg_relations.add(
+                                f"{entity1} → {rel_type} → {entity2}"
+                            )
+                        else:
+                            kg_relations.add(
+                                relation
+                            )  # Keep original format if parsing fails
+
+                # Add sorted relations
+                formatted.extend(sorted(kg_relations))
+
+            except Exception as e:
+                print(
+                    f"Warning: Error processing knowledge graph results - {str(e)}"
+                )
+                formatted.append("(Error parsing knowledge graph data)")
+
+        # Process vector DB results
+        if results.get("vector_db"):
+            try:
+                formatted.append(
+                    "\n=== Retrieved_context from Milvus Database ==="
+                )
+
+                for item in results["vector_db"]:
+                    if not isinstance(item, dict):
+                        continue
+
+                    # Get content from either 'text' or 'content' field
+                    content = item.get("text") or item.get("content") or ""
+                    if content:
+                        formatted.append(f"- {content.strip()}")
+
+            except Exception as e:
+                print(
+                    f"Warning: Error processing vector DB results - {str(e)}"
+                )
+                formatted.append("(Error parsing vector database data)")
+
+        return (
+            "\n".join(filter(None, formatted))
+            if formatted
+            else "No relevant results found"
+        )
