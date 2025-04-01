@@ -27,8 +27,8 @@ class BaseReasoner:
         # and create {metric}_.csv automatically
         self.trial_data_dir = self.result_dir + "trial_data/"
         self.messages_file_path = self.result_dir + "messages.jsonl"
-        self.comment_history_file_path = (
-            self.result_dir + "comment_history.jsonl"
+        self.insight_history_file_path = (
+            self.result_dir + "insight_history.jsonl"
         )
         self.experiment_analysis_file_path = (
             self.result_dir + "experiment_analysis.jsonl"
@@ -39,7 +39,7 @@ class BaseReasoner:
         self.experiment_analysis = {}
         self.overview = ""
         self.summary = ""
-        self.conclusion = ""
+        self.report = ""
         self.keywords = ""
 
     def _load_config(self, path: str) -> Dict:
@@ -59,50 +59,50 @@ class BaseReasoner:
         print("Done!\n")
         return "\n".join(combined_data)
 
-    def _save_comment(self, trial_index: int) -> None:
-        # 初始化没有comment，comment 是 str，需要转换成 json
-        """保存返回的 comment（DSReasoner 的 Assitant 信息） 到 comment history 中，jsonl 格式"""
-        print(f"Start saving the comment data for this round of trials\n")
-        new_comment = self.client.messages[-1]['content']  # json
-        data = {"trial_index": trial_index, "comment": new_comment}  # dict
-        add_to_jsonl(self.comment_history_file_path, data)
+    def _save_insight(self, trial_index: int) -> None:
+        # 初始化没有insight，insight 是 str，需要转换成 json
+        """保存返回的 insight（DSReasoner 的 Assitant 信息） 到 insight history 中，jsonl 格式"""
+        print(f"Start saving the insight data for this round of trials\n")
+        new_insight = self.client.messages[-1]['content']  # json
+        data = {"trial_index": trial_index, "insight": new_insight}  # dict
+        add_to_jsonl(self.insight_history_file_path, data)
         print("Done!\n")
 
     def _save_messages(self):
         self.client.save_messages(self.messages_file_path)
 
-    def _extract_keywords_from_comment(self, comment: str):
-        """从comment中提取用于检索的关键词
+    def _extract_keywords_from_insight(self, insight: str):
+        """从insight中提取用于检索的关键词
 
         Args:
-            comment: 包含keywords字段的JSON字符串
+            insight: 包含keywords字段的JSON字符串
 
         Returns:
             提取到的关键词字符串，如果提取失败则返回空字符串
         """
         try:
-            comment = comment.strip()
+            insight = insight.strip()
             # 移除可能的JSON代码块标记
-            comment = re.sub(
-                r'^```json\s*|\s*```$', '', comment, flags=re.MULTILINE
+            insight = re.sub(
+                r'^```json\s*|\s*```$', '', insight, flags=re.MULTILINE
             )
 
             # 解析JSON
-            comment_data = json.loads(comment)
+            insight_data = json.loads(insight)
 
             # 检查keywords字段是否存在且是字符串
-            if isinstance(comment_data, dict) and "keywords" in comment_data:
-                keywords = comment_data["keywords"]
+            if isinstance(insight_data, dict) and "keywords" in insight_data:
+                keywords = insight_data["keywords"]
                 if isinstance(keywords, str):
                     return keywords.strip()
                 elif isinstance(keywords, (list, tuple)):
                     return " ".join(str(k) for k in keywords).strip()
 
-            print(f"Warning: No valid 'keywords' field found in comment")
+            print(f"Warning: No valid 'keywords' field found in insight")
             return ""
 
         except json.JSONDecodeError:
-            print(f"Warning: Failed to parse comment as JSON")
+            print(f"Warning: Failed to parse insight as JSON")
             return ""
         except Exception as e:
             print(f"Warning: Unexpected error extracting keywords - {str(e)}")
@@ -111,22 +111,22 @@ class BaseReasoner:
     def get_keywords(self):
         return self.keywords
 
-    def _extract_candidates_from_comment(self, comment, n: int = 5):
-        """输入 comment(json)，返回置信度最高的 n 个 candidates"""
-        print("Start extracting candidates array from comment...")
-        comment = comment.strip()
-        comment = re.sub(
-            r'^```json\s*|\s*```$', '', comment, flags=re.MULTILINE
+    def _extract_candidates_from_insight(self, insight, n: int = 5):
+        """输入 insight(json)，返回置信度最高的 n 个 candidates"""
+        print("Start extracting candidates array from insight...")
+        insight = insight.strip()
+        insight = re.sub(
+            r'^```json\s*|\s*```$', '', insight, flags=re.MULTILINE
         )
 
         CONFIDENCE_ORDER = {"high": 0, "medium": 1, "low": 2}
         # json to dict
-        comment = json.loads(comment)
-        if not isinstance(comment, dict) or "hypotheses" not in comment:
+        insight = json.loads(insight)
+        if not isinstance(insight, dict) or "hypotheses" not in insight:
             raise ValueError("Invalid JSON format: missing 'hypotheses' key")
 
         sorted_hypotheses = sorted(
-            comment["hypotheses"],
+            insight["hypotheses"],
             key=lambda x: CONFIDENCE_ORDER.get(x["confidence"].lower(), 3),
         )
 
@@ -166,11 +166,11 @@ class BaseReasoner:
         return trial
 
     def _save_experiment_data(self, experiment, trial: Trial) -> None:
-        """保存实验数据，包括 comment, messages 和 trial_data"""
+        """保存实验数据，包括 insight, messages 和 trial_data"""
         print(
-            "Start saving the experiment data, including comment, messages and trial data...\n"
+            "Start saving the experiment data, including insight, messages and trial data...\n"
         )
-        self._save_comment(trial_index=trial.index)
+        self._save_insight(trial_index=trial.index)
         self._save_messages()
         save_trial_data(
             experiment=experiment, trial=trial, save_dir=self.trial_data_dir
@@ -213,7 +213,7 @@ class BaseReasoner:
             )
             content, _ = self.client.generate(user_prompt=formatted_prompt)
             print(
-                f"Initial sampling process has done! and the comment is as follows\n {content}\n\n"
+                f"Initial sampling process has done! and the insight is as follows\n {content}\n\n"
             )
             return content
 
@@ -221,10 +221,10 @@ class BaseReasoner:
             print(f"Error happended while initial sampling: {e}")
             return ""
 
-    def optimization_first_round(self, comment):
+    def optimization_first_round(self, insight):
         # 第一轮并没有 Trial，所以 optimization 中不保存任何数据，单独处理！在外面运行完实验后动态保存
-        candidates = self._extract_candidates_from_comment(comment)
-        self.keywords = self._extract_keywords_from_comment(comment)
+        candidates = self._extract_candidates_from_insight(insight)
+        self.keywords = self._extract_keywords_from_insight(insight)
         return candidates
 
     def optimization_loop(
@@ -235,42 +235,42 @@ class BaseReasoner:
         retrieval_context: str = None,
         n: int = 10,
     ) -> str:
-        """take in -> (rag) -> generate(and save) -> comment -> return candidates(extract_comment_from_candidates)"""
-        """根据上一轮的trial data(arms, metrics), comment history, 生成下一轮的 comment，并返回 candidates_array"""
+        """take in -> (rag) -> generate(and save) -> insight -> return candidates(extract_insight_from_candidates)"""
+        """根据上一轮的trial data(arms, metrics), insight history, 生成下一轮的 insight，并返回 candidates_array"""
         # 获取BO模型推荐的点
         generator_run_by_bo = bo_model.gen(n=n)
         bo_candidates = [arm.parameters for arm in generator_run_by_bo.arms]
 
         # 加载 trial data， dir（self.trial_data_dir） 下面包含所有的 metrics.csv 文件
         trial_data = self._load_trial_data()
-        # 加载 comment history   self.comment_history_file_path  是一个 jsonl 文件，可以通过concatenate_jsonl函数拼接 comment_history
+        # 加载 insight history   self.insight_history_file_path  是一个 jsonl 文件，可以通过concatenate_jsonl函数拼接 insight_history
 
-        with open(self.comment_history_file_path, 'r', encoding='utf-8') as f:
-            comment_history = []
+        with open(self.insight_history_file_path, 'r', encoding='utf-8') as f:
+            insight_history = []
             for line_number, line in enumerate(f, 1):
                 stripped_line = line.strip()
                 # 跳过空行
                 if not stripped_line:
                     continue
                 try:
-                    comment_history.append(json.loads(stripped_line))
+                    insight_history.append(json.loads(stripped_line))
                 except json.JSONDecodeError as e:
                     print(
                         f"第{line_number}行解析失败，内容：{stripped_line[:50]}...，错误类型：{e.msg}"
                     )
 
         # 将解析后的JSON对象列表传递给concatenate_jsonl
-        comment_history = concatenate_jsonl(comment_history)
-        # 利用 prompt_template 生成 prompt。并使用dsreasoner.generate 生成 comment
+        insight_history = concatenate_jsonl(insight_history)
+        # 利用 prompt_template 生成 prompt。并使用dsreasoner.generate 生成 insight
         condidates_array = []
         try:
             print(f"Start Optimization iteration {trial.index}...")
-            # 把trial data, comment history 拼接到 meta_dict 中
+            # 把trial data, insight history 拼接到 meta_dict 中
             meta_dict = {
                 **self.exp_config,
                 "iteration": trial.index,
                 "trial_data": trial_data,
-                "comment_history": comment_history,
+                "insight_history": insight_history,
                 "bo_recommendations": bo_candidates,
                 "retrieved_context": retrieval_context,
             }
@@ -278,12 +278,12 @@ class BaseReasoner:
             formatted_prompt = self.prompt_manager.format(
                 "optimization_loop", **meta_dict
             )
-            comment, _ = self.client.generate(user_prompt=formatted_prompt)
+            insight, _ = self.client.generate(user_prompt=formatted_prompt)
             print(
-                f"Optimization loop iteration {trial.index} has done! and the comment is as follows\n {comment}\n\n"
+                f"Optimization loop iteration {trial.index} has done! and the insight is as follows\n {insight}\n\n"
             )
-            self.keywords = self._extract_keywords_from_comment(comment)
-            condidates_array = self._extract_candidates_from_comment(comment)
+            self.keywords = self._extract_keywords_from_insight(insight)
+            condidates_array = self._extract_candidates_from_insight(insight)
 
         except Exception as e:
             print(
@@ -294,71 +294,69 @@ class BaseReasoner:
         # 保存数据
         self._save_experiment_data(experiment=experiment, trial=trial)
 
-        # 从comment中抽象candidates_array 并 return
+        # 从insight中抽象candidates_array 并 return
         return condidates_array
 
-    def _generate_summary(self, trial_data, comment_history):
+    def _generate_summary(self, trial_data, insight_history):
         """返回 json 格式，其实 markdown 更贴切"""
         print(f"Start generating summary...\n")
         meta_dict = {
             **self.exp_config,
-            "iteration": len(comment_history),
+            "iteration": len(insight_history),
             "trial_data": trial_data,
-            "comment_history": comment_history,
+            "insight_history": insight_history,
         }
         formatted_prompt = self.prompt_manager.format(
             "generate_summary", **meta_dict
         )
-        comment, _ = self.client.generate(user_prompt=formatted_prompt)
+        insight, _ = self.client.generate(user_prompt=formatted_prompt)
         print(
-            f"Experiment summary has been generated! and the comment is as follows\n {comment}\n\n"
+            f"Experiment summary has been generated! and the insight is as follows\n {insight}\n\n"
         )
-        self.summary = comment
+        self.summary = insight
         self._save_messages()
-        return comment
+        return insight
 
-    def _generate_conclusion(self, trial_data, comment_history):
+    def _generate_report(self, trial_data, insight_history):
         """返回 json 格式"""
-        print(f"Start generating conclusion...\n")
+        print(f"Start generating report...\n")
         meta_dict = {
             **self.exp_config,
-            "iteration": len(comment_history),
+            "iteration": len(insight_history),
             "trial_data": trial_data,
-            "comment_history": comment_history,
+            "insight_history": insight_history,
         }
         formatted_prompt = self.prompt_manager.format(
-            "generate_conclusion", **meta_dict
+            "generate_report", **meta_dict
         )
-        comment, _ = self.client.generate(user_prompt=formatted_prompt)
+        insight, _ = self.client.generate(user_prompt=formatted_prompt)
         print(
-            f"Experiment summary has been generated! and the comment is as follows\n {comment}\n\n"
+            f"Experiment summary has been generated! and the insight is as follows\n {insight}\n\n"
         )
-        self.conclusion = comment
+        self.report = insight
         # 作为调试，看看user_input
         self._save_messages()
-        return comment
+        return insight
 
     def generate_experiment_analysis(
         self,
     ):
-        """overview + summary + conclusion, 从 self 里面拿，反正不是很多"""
+        """overview + summary + report, 从 self 里面拿，反正不是很多"""
         print(
-            "Start generating experiment analysis..., conluding overview, experiment summary and conclusion. \n"
+            "Start generating experiment analysis..., conluding overview, experiment summary and report. \n"
         )
         file_path = self.result_dir + "experiment_analysis.json"
         trial_data = self._load_trial_data()
-        with open(self.comment_history_file_path, 'r', encoding='utf-8') as f:
+        with open(self.insight_history_file_path, 'r', encoding='utf-8') as f:
             # 逐行读取并解析JSONL文件
-            comment_history = [json.loads(line) for line in f]
+            insight_history = [json.loads(line) for line in f]
 
         # 将解析后的JSON对象列表传递给concatenate_jsonl
-        comment_history = concatenate_jsonl(comment_history)
+        insight_history = concatenate_jsonl(insight_history)
         analysis = {
             "overview": self.overview,
-            "summary": self._generate_summary(trial_data, comment_history),
-            "conclusion": self._generate_conclusion(
-                trial_data, comment_history
-            ),
+            "summary": self._generate_summary(trial_data, insight_history),
+            "report": self._generate_report(trial_data, insight_history),
         }
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(analysis, f, ensure_ascii=False, indent=4)
