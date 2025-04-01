@@ -7,7 +7,6 @@ import re
 import glob
 
 from src.prompts.base import PromptManager
-from src.llms.qwq import QWQClient
 from src.utils.metric import save_trial_data
 
 from src.utils.jsonl import add_to_jsonl, concatenate_jsonl
@@ -180,7 +179,7 @@ class BaseReasoner:
         try:
             print("Start generating overview...")
             formatted_prompt = self.prompt_manager.format(
-                "overview_generate", **self.exp_config
+                "generate_overview", **self.exp_config
             )
             # print(f"Formatted prompt: {formatted_prompt}")
 
