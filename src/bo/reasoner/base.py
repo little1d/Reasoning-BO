@@ -132,7 +132,9 @@ class BaseReasoner:
 
         candidates = []
         for hyp in sorted_hypotheses:
-            if "parameter_sets" not in hyp or not isinstance(hyp["parameter_sets"], list):
+            if "parameter_sets" not in hyp or not isinstance(
+                hyp["parameter_sets"], list
+            ):
                 continue
 
             for point in hyp["parameter_sets"]:
@@ -271,7 +273,6 @@ class BaseReasoner:
                 "comment_history": comment_history,
                 "bo_recommendations": bo_candidates,
                 "retrieved_context": retrieval_context,
-                # TODO 在 commment 的模板中增加 retrieval_context 的部分
             }
             # 利用 prompt template "optimization loop" 生成 formatted_prompt
             formatted_prompt = self.prompt_manager.format(
