@@ -1,5 +1,5 @@
 import json
-from ax import Trial, Arm, GeneratorRun
+from ax import Trial, Arm, GeneratorRun, Experiment
 import json
 from typing import Dict
 import os
@@ -111,7 +111,7 @@ class BaseReasoner:
     def get_keywords(self):
         return self.keywords
 
-    def _extract_candidates_from_insight(self, insight, n: int = 5):
+    def _extract_candidates_from_insight(self, insight, n: int = 3):
         """输入 insight(json)，返回置信度最高的 n 个 candidates"""
         print("Start extracting candidates array from insight...")
         insight = insight.strip()
@@ -229,14 +229,33 @@ class BaseReasoner:
 
     def optimization_loop(
         self,
-        experiment,
+        experiment: Experiment,
         trial: Trial,
         bo_model: BOModel,
         retrieval_context: str = None,
-        n: int = 10,
+        n: int = 6,
     ) -> str:
         """take in -> (rag) -> generate(and save) -> insight -> return candidates(extract_insight_from_candidates)"""
         """根据上一轮的trial data(arms, metrics), insight history, 生成下一轮的 insight，并返回 candidates_array"""
+
+        """Perform optimization loop to generate insights and candidates for next trial.
+        Args:
+            experiment: Current experiment object containing trial data
+            trial: Current trial object
+            bo_model: Bayesian Optimization model used for generating recommendations
+            retrieval_context: Optional context from retrieval system, if None, represent no retrieve
+            n: Number of candidates for bo_model to generate
+            
+        Returns:
+            str: Generated 'insight' text containing analysis and recommendations
+            
+        The function:
+            1. Gets BO model recommendations
+            2. Loads trial data and insight history 
+            3. Formats prompt with experiment config, trial data, insights etc.
+            4. Generates new insight using client
+            5. Extracts keywords and candidates from insight
+        """
         # 获取BO模型推荐的点
         generator_run_by_bo = bo_model.gen(n=n)
         bo_candidates = [arm.parameters for arm in generator_run_by_bo.arms]

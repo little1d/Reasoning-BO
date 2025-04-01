@@ -132,20 +132,50 @@ class ChemistryMetric(Metric):
             mean = []
             sem = []
             trial_indices = []
+            skipped_arms = 0
+            print(f"\nDebug: Dataset parameter names: {data.param_names}")
+            print(
+                f"Debug: First trial arm parameters: {next(iter(trial.arms_by_name.values())).parameters.keys()}\n"
+            )
 
             # Filter arms with valid parameters
             for name, arm in trial.arms_by_name.items():
                 try:
+                    # First validate all parameters exist in the data
+                    missing_params = [
+                        p for p in arm.parameters if p not in data.param_names
+                    ]
+                    if missing_params:
+                        print(f"Debug: Skipping - Parameter mismatch")
+                        print(f"Arm params: {sorted(arm.parameters.keys())}")
+                        print(f"Data params: {sorted(data.param_names)}")
+                        print(f"Missing params: {missing_params}")
+                        skipped_arms += 1
+                        continue
+
                     val = data.evaluate(params=arm.parameters)
+                    print(f"Debug: Found yield value: {val}")
+
                     arm_names.append(name)
                     mean.append(val)
                     sem.append(noise_sd)
                     trial_indices.append(trial.index)
-                except KeyError:
+                except KeyError as e:
+                    print(f"Debug: KeyError - {str(e)}")
                     # Skip arms with missing data
+                    skipped_arms += 1
                     continue
 
+            if skipped_arms > 0:
+                print(
+                    f"Warning: Skipped {skipped_arms}/{len(trial.arms_by_name)} "
+                    f"arms due to missing data in {self.problem_type.value} dataset"
+                )
+
             if not arm_names:
+                print("\nDebug: All arms skipped. Details:")
+                print(f"Total arms: {len(trial.arms_by_name)}")
+                print(f"Skipped arms: {skipped_arms}")
                 return Err(
                     MetricFetchE(
                         message=f"No valid arms found for {self.name}",

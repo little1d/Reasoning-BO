@@ -5,7 +5,7 @@
     "constraint": "Reagents must be chemically compatible and reaction conditions must maintain intermediate stability. All combinations must form stable palladium complexes during catalytic cycle.",
     "parameter_definitions": [
         {
-            "display_name": "Electrophile",
+            "display_name": "Electrophile_SMILES",
             "description": "Aryl halide substrate for coupling (SMILES representation)",
             "data_type": "categorical",
             "bounds": [
@@ -16,7 +16,7 @@
             ]
         },
         {
-            "display_name": "Nucleophile",
+            "display_name": "Nucleophile_SMILES",
             "description": "Boronic acid nucleophile (SMILES representation)",
             "data_type": "categorical",
             "bounds": [
@@ -26,7 +26,7 @@
             ]
         },
         {
-            "display_name": "Ligand",
+            "display_name": "Ligand_SMILES",
             "description": "Phosphine ligand for palladium catalyst (SMILES)",
             "data_type": "categorical",
             "bounds": [
@@ -44,7 +44,7 @@
             ]
         },
         {
-            "display_name": "Base",
+            "display_name": "Base_SMILES",
             "description": "Reaction base for transmetallation step (SMILES)",
             "data_type": "categorical",
             "bounds": [
@@ -58,7 +58,7 @@
             ]
         },
         {
-            "display_name": "Solvent",
+            "display_name": "Solvent_SMILES",
             "description": "Reaction medium (SMILES representation)",
             "data_type": "categorical",
             "bounds": [
