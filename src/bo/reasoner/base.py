@@ -112,6 +112,8 @@ class BaseReasoner:
         return self.keywords
 
     def _extract_candidates_from_insight(self, insight, n: int = 3):
+        # BUG
+        # 对于复杂任务，insight 给出的 candidates 很可能有错误，这个函数很可能抽取三个 candidates都不是有效的 arms，导致算法中断
         """输入 insight(json)，返回置信度最高的 n 个 candidates"""
         print("Start extracting candidates array from insight...")
         insight = insight.strip()
@@ -233,7 +235,7 @@ class BaseReasoner:
         trial: Trial,
         bo_model: BOModel,
         retrieval_context: str = None,
-        n: int = 6,
+        n: int = 7,
     ) -> str:
         """take in -> (rag) -> generate(and save) -> insight -> return candidates(extract_insight_from_candidates)"""
         """根据上一轮的trial data(arms, metrics), insight history, 生成下一轮的 insight，并返回 candidates_array"""
