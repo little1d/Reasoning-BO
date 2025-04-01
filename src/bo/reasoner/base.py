@@ -132,10 +132,10 @@ class BaseReasoner:
 
         candidates = []
         for hyp in sorted_hypotheses:
-            if "points" not in hyp or not isinstance(hyp["points"], list):
+            if "parameter_sets" not in hyp or not isinstance(hyp["parameter_sets"], list):
                 continue
 
-            for point in hyp["points"]:
+            for point in hyp["parameter_sets"]:
                 if not isinstance(point, dict):
                     continue
                 candidates.append(point)
