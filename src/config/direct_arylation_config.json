@@ -1,23 +1,24 @@
 {
-    "name": "Optimization of Direct Arylation Reaction Yield",
-    "domain": "Organic Chemistry - Catalysis",
-    "description": "This experiment aims to optimize reaction conditions for direct arylation to maximize product yield by exploring different bases, ligands, solvents, concentrations, and temperatures.",
-    "constraint": "Reactions must be conducted under inert atmosphere with precise temperature and concentration control.",
-    "parameters_and_bounds": [
+    "name": "Direct Arylation Reaction Optimization",
+    "application_context": "Chemistry/Reaction Condition Optimization",
+    "description": "This experiment aims to optimize the direct arylation reaction by exploring combinations of base, ligand, solvent, concentration, and temperature to maximize reaction yield or desired product selectivity. The input parameters include categorical choices of reactants and solvents, discrete temperature levels, and predefined concentration points. The goal is to identify the best reaction conditions within chemically feasible space.",
+    "constraint": "All selected SMILES strings must correspond to compatible chemical components. Temperature and concentration values must be among experimentally supported points.",
+    "parameter_definitions": [
         {
-            "name": "Base_SMILES",
-            "description": "The base used in the reaction, influencing deprotonation efficiency and reaction rate.",
+            "display_name": "Base_SMILES",
+            "description": "SMILES string representing the base and counterion used in the reaction.",
+            "data_type": "categorical",
             "bounds": [
                 "O=C([O-])C(C)(C)C.[Cs+]",
                 "O=C([O-])C(C)(C)C.[K+]",
                 "O=C([O-])C.[Cs+]",
                 "O=C([O-])C.[K+]"
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Ligand_SMILES",
-            "description": "The ligand used to stabilize the catalyst and influence selectivity and yield.",
+            "display_name": "Ligand_SMILES",
+            "description": "SMILES string representing the phosphine ligand used in the reaction.",
+            "data_type": "categorical",
             "bounds": [
                 "C[C@]1(O2)O[C@](C[C@]2(C)P3C4=CC=CC=C4)(C)O[C@]3(C)C1",
                 "CC(C)(C)P(C1=CC=CC=C1)C(C)(C)C",
@@ -31,43 +32,43 @@
                 "P(C1=CC=CC=C1)(C2=CC=CC=C2)C3=CC=CC=C3",
                 "P(C1=CC=CO1)(C2=CC=CO2)C3=CC=CO3",
                 "P(C1CCCCC1)(C2CCCCC2)C3CCCCC3"
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Solvent_SMILES",
-            "description": "The solvent used in the reaction, affecting solubility and reactivity.",
+            "display_name": "Solvent_SMILES",
+            "description": "SMILES string representing the solvent used in the reaction.",
+            "data_type": "categorical",
             "bounds": [
                 "CC(N(C)C)=O",
                 "CC1=CC=C(C)C=C1",
                 "CCCC#N",
                 "CCCCOC(C)=O"
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Concentration",
-            "description": "Molar concentration of the reactants in the reaction mixture.",
+            "display_name": "Concentration",
+            "description": "Molar concentration of reactants in solution (mol/L).",
+            "data_type": "categorical",
             "bounds": [
                 0.057,
                 0.1,
                 0.153
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Temp_C",
-            "description": "Reaction temperature in degrees Celsius.",
+            "display_name": "Temp_C",
+            "description": "Reaction temperature in Celsius.",
+            "data_type": "categorical",
             "bounds": [
                 90,
                 105,
                 120
-            ],
-            "type": "discrete"
+            ]
         }
     ],
     "target": {
-        "name": "Reaction Yield",
-        "description": "The percentage of product formation relative to the theoretical maximum."
+        "name": "Reaction_Yield",
+        "description": "The final product yield (%) from the direct arylation reaction under given conditions.",
+        "direction": "maximize"
     }
 }

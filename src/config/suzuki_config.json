@@ -1,33 +1,34 @@
 {
     "name": "Suzuki Reaction Optimization",
-    "domain": "Organic Chemistry - Cross Coupling Reactions",
-    "description": "Optimization of Suzuki cross-coupling reaction to enhance reaction yield by exploring different electrophiles, nucleophiles, ligands, bases, and solvents.",
-    "constraint": "Reagents must be compatible with each other and reaction conditions must ensure stability of intermediates.",
-    "parameters_and_bounds": [
+    "application_context": "Organic Chemistry/Cross Coupling Reaction Optimization",
+    "description": "Optimization of Suzuki-Miyaura cross-coupling reaction conditions to maximize product yield through systematic exploration of electrophile-nucleophile combinations, ligand selection, base types, and solvent effects. The reaction involves palladium-catalyzed coupling between aryl halides and arylboronic acids.",
+    "constraint": "Reagents must be chemically compatible and reaction conditions must maintain intermediate stability. All combinations must form stable palladium complexes during catalytic cycle.",
+    "parameter_definitions": [
         {
-            "name": "Electrophile_SMILES",
-            "description": "SMILES representation of the electrophilic substrate",
+            "display_name": "Electrophile_SMILES",
+            "description": "Aryl halide substrate for coupling (SMILES representation)",
+            "data_type": "categorical",
             "bounds": [
                 "BrC1=CC=C(N=CC=C2)C2=C1",
                 "ClC1=CC=C(N=CC=C2)C2=C1",
                 "IC1=CC=C(N=CC=C2)C2=C1",
                 "O=S(OC1=CC=C(N=CC=C2)C2=C1)(C(F)(F)F)=O"
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Nucleophile_SMILES",
-            "description": "SMILES representation of the nucleophilic substrate",
+            "display_name": "Nucleophile_SMILES",
+            "description": "Boronic acid nucleophile (SMILES representation)",
+            "data_type": "categorical",
             "bounds": [
                 "CC1=CC=C(N(C2CCCCO2)N=C3)C3=C1[B-](F)(F)F",
                 "CC1=CC=C(N(C2CCCCO2)N=C3)C3=C1B(O)O",
                 "CC1=CC=C(N(C2CCCCO2)N=C3)C3=C1B4OC(C)(C)C(C)(C)O4"
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Ligand_SMILES",
-            "description": "SMILES representation of the ligand used in the reaction",
+            "display_name": "Ligand_SMILES",
+            "description": "Phosphine ligand for palladium catalyst (SMILES)",
+            "data_type": "categorical",
             "bounds": [
                 "[c-]1(P(C2=CC=CC=C2)C3=CC=CC=C3)cccc1.[c-]4(P(C5=CC=CC=C5)C6=CC=CC=C6)cccc4.[Fe+2]",
                 "CC(C)(C)P(C(C)(C)C)C1=CC=C(N(C)C)C=C1",
@@ -40,12 +41,12 @@
                 "COC1=CC=CC(OC)=C1C2=C(P(C3CCCCC3)C4CCCCC4)C=CC=C2",
                 "P(C1=CC=CC=C1)(C2=CC=CC=C2)C3=CC=CC=C3",
                 "P(C1CCCCC1)(C2CCCCC2)C3CCCCC3"
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Base_SMILES",
-            "description": "SMILES representation of the base used in the reaction",
+            "display_name": "Base_SMILES",
+            "description": "Reaction base for transmetallation step (SMILES)",
+            "data_type": "categorical",
             "bounds": [
                 "[Cs+].[F-]",
                 "[K+].[OH-]",
@@ -54,23 +55,23 @@
                 "CCN(CC)CC",
                 "O=P([O-])([O-])[O-].[K+].[K+].[K+]",
                 "OC([O-])=O.[Na+]"
-            ],
-            "type": "discrete"
+            ]
         },
         {
-            "name": "Solvent_SMILES",
-            "description": "SMILES representation of the solvent used in the reaction",
+            "display_name": "Solvent_SMILES",
+            "description": "Reaction medium (SMILES representation)",
+            "data_type": "categorical",
             "bounds": [
                 "C1COCC1",
                 "CO",
                 "N#CC",
                 "O=CN(C)C"
-            ],
-            "type": "discrete"
+            ]
         }
     ],
     "target": {
-        "name": "yield",
-        "description": "Maximize the yield of the Suzuki cross-coupling reaction"
+        "name": "Yield",
+        "description": "Percentage yield of cross-coupled product",
+        "direction": "maximize"
     }
 }
