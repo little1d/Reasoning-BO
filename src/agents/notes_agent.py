@@ -9,7 +9,7 @@ r"""
 """
 
 from typing import Optional, List, Dict, Any, Type, Union
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from camel.agents import ChatAgent
 from camel.models import BaseModelBackend
 from okagents.agents.kg_agent import KGAgent
@@ -23,6 +23,57 @@ class BaseNotesResponse(BaseModel):
     """Base response format for notes extraction. All integrated classes must return str or List[str]"""
 
     notes: List[str]
+
+
+class ReasoningNotesResponse(BaseModel):
+    """Structured notes extracted from reasoning data"""
+
+    notes: List[str] = Field(
+        ...,
+        description="General bullet-point notes extracted from reasoning data. May include summaries of findings, relationships, or principles.",
+    )
+
+    key_findings: List[str] = Field(
+        default_factory=list,
+        description="Important factual discoveries or observations drawn from the reasoning process.",
+    )
+
+    parameter_relationships: List[str] = Field(
+        default_factory=list,
+        description="Descriptive cause-effect or correlation relationships between different parameters or variables.",
+    )
+
+    optimization_principles: List[str] = Field(
+        default_factory=list,
+        description="Actionable principles or rules that can help optimize the experiment. Should be verifiable and clearly beneficial.",
+    )
+
+
+class CompassNotesResponse(BaseModel):
+    """
+    General-purpose response format for structured scientific notes.
+    Suitable for notes extracted from any experimental description or setup.
+    """
+
+    notes: List[str] = Field(
+        ...,
+        description="Free-form bullet-point notes. General scientific facts, summaries, or highlights.",
+    )
+
+    theoretical_background: List[str] = Field(
+        default_factory=list,
+        description="Scientific principles, mechanisms, or theories underlying the experiment.",
+    )
+
+    variable_properties: List[str] = Field(
+        default_factory=list,
+        description="Descriptions of individual variables’ attributes, roles, or behaviors.",
+    )
+
+    variable_relationships: List[str] = Field(
+        default_factory=list,
+        description="Cause-effect or correlated relationships between different variables or parameters.",
+    )
 
 
 class NotesAgent:
@@ -54,21 +105,43 @@ class NotesAgent:
 
     def _init_prompt_templates(self):
         """Initialize default prompt templates"""
-        self.DEFAULT_EXTRACTION_PROMPT = """
-        Extract the most important factual notes from this reasoning data.
-        Focus on concrete facts, entities, relationships and key findings.
-        Return only the most essential information in bullet points.
-        Reasoning data: {input}
+        self.DEFAULT_REASONING_NOTES_PROMPT = """
+        Analyze the following reasoning data and extract structured scientific notes.
+
+        Guidelines:
+        - Each item should be a clear and self-contained bullet point.
+        - Only use information present in the reasoning. Do not speculate.
+        - Keep the content factual, concise, and helpful.
+
+        Focus on the following aspects:
+        1. **Key findings** — Verifiable results, conclusions, or observations grounded in reasoning.
+        2. **Parameter relationships** — How different variables or conditions affect each other (cause-effect, correlation).
+        3. **Optimization principles** — Rules or strategies suggested by the reasoning that could improve experimental results.
+        4. **General notes** — Summarized insights that don't fall into the above categories.
+
+        Reasoning data:
+        {input}
         """
 
-        self.DEFAULT_EXPERIMENT_PROMPT = """
-        Extract and structure key information from this experimental setup.
-        Include: reactants, solvents, conditions, concentrations, and other critical parameters.
-        Format as clear bullet points with precise values where available.
-        Experimental setup: {input}
+        self.DEFAULT_COMPASS_NOTES_PROMPT = """
+        Extract and structure scientific notes from the following experimental setup.
+
+        Guidelines:
+        - Use bullet-point style strings in each list.
+        - Base your output only on the given input.
+        - Do not fabricate information not present in the experiment.
+
+        Focus on the following aspects:
+        1. **Theoretical background** — Scientific principles, hypotheses, or mechanisms implied or explicitly stated.
+        2. **Variable properties** — Roles, attributes, or behaviors of each variable/component involved.
+        3. **Variable relationships** — Any cause-effect, dependency, or correlation observed or described.
+        4. **General notes** — Additional relevant scientific information or implicit assumptions.
+
+        Experimental setup:
+        {input}
         """
 
-    def extract_notes(
+    def extract_reasoning_notes(
         self,
         reasoning_data: str,
         save_schema: Type[BaseNotesResponse] = BaseNotesResponse,
@@ -85,7 +158,7 @@ class NotesAgent:
         Returns:
             Structured response with extracted notes
         """
-        final_prompt = (prompt or self.DEFAULT_EXTRACTION_PROMPT).format(
+        final_prompt = (prompt or self.DEFAULT_REASONING_NOTES_PROMPT).format(
             input=reasoning_data
         )
 
@@ -96,7 +169,7 @@ class NotesAgent:
         self._store_notes(response)
         return response
 
-    def extract_experiment_info(
+    def extract_compass_notes(
         self,
         experiment_data: str,
         save_schema: Type[BaseNotesResponse] = BaseNotesResponse,
@@ -115,7 +188,7 @@ class NotesAgent:
         Returns:
             Structured response with extracted notes
         """
-        final_prompt = (prompt or self.DEFAULT_EXPERIMENT_PROMPT).format(
+        final_prompt = (prompt or self.DEFAULT_COMPASS_NOTES_PROMPT).format(
             input=experiment_data
         )
 
