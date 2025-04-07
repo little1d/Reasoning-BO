@@ -67,7 +67,9 @@ class AckleyMetric(Metric):
     def _evaluate_ackley(self, params: TParameterization) -> float:
         """Evaluate Ackley function at given parameters."""
         # Convert parameters to numpy array
-        x = np.array([params[f"x{i+1}"] for i in range(self.dimension)])
+        x = np.array(
+            [params[param_name] for param_name in sorted(params.keys())]
+        )
 
         # First exponential term
         sum_sq = np.sum(x**2)

@@ -54,7 +54,9 @@ class RosenbrockMetric(Metric):
     def _evaluate_rosenbrock(self, params: TParameterization) -> float:
         """Evaluate Rosenbrock function at given parameters."""
         # Convert parameters to numpy array
-        x = np.array([params[f"x{i+1}"] for i in range(self.dimension)])
+        x = np.array(
+            [params[param_name] for param_name in sorted(params.keys())]
+        )
 
         # Rosenbrock function calculation
         sum_val = 0.0

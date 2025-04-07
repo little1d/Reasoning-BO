@@ -47,7 +47,7 @@ class LunarLanderMetric(Metric):
         # 硬编码
         # x = np.array([parameters[f"x{i+1}"] for i in range(12)])
         # 软编码
-        print(parameters)
+        # print(parameters)
         x = np.array(
             [
                 parameters[param_name]
