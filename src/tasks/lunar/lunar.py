@@ -44,7 +44,16 @@ class LunarLanderMetric(Metric):
 
     def _evaluate_lander(self, parameters: TParameterization) -> float:
         """Evaluate lander performance for given parameters."""
-        x = np.array([parameters[f"x{i+1}"] for i in range(12)])
+        # 硬编码
+        # x = np.array([parameters[f"x{i+1}"] for i in range(12)])
+        # 软编码
+        print(parameters)
+        x = np.array(
+            [
+                parameters[param_name]
+                for param_name in sorted(parameters.keys())
+            ]
+        )
         params = [[x, seed] for seed in self.seed]
         rewards = np.array(self.pool.map(simulate_lunar_lander, params))
         return np.mean(rewards)

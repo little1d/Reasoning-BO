@@ -1,0 +1,121 @@
+{
+    "name": "Bayesian Optimization on Lunar Lander",
+    "application_context": "Aerospace Control",
+    "description": "Optimize Lunar Lander control policy parameters to maximize landing reward. The environment simulates a spacecraft landing on the moon surface with physics constraints.",
+    "constraint": "Parameters must be in [0, 1] range. Landing is considered successful when the lander comes to rest without crashing.",
+    "parameter_definitions": [
+        {
+            "display_name": "main_engine_throttle",
+            "description": "Main engine throttle control parameter",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "side_engine_throttle",
+            "description": "Side engine throttle control parameter",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "hover_control_gain",
+            "description": "PID controller gain for hover stabilization",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "attitude_control_gain",
+            "description": "PID controller gain for attitude control",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "landing_leg_damping",
+            "description": "Damping coefficient for landing legs",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "velocity_smoothing",
+            "description": "Velocity measurement smoothing factor",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "angular_rate_limit",
+            "description": "Maximum allowed angular rotation rate",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "vertical_speed_limit",
+            "description": "Maximum allowed vertical descent speed",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "horizontal_speed_limit",
+            "description": "Maximum allowed horizontal speed",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "fuel_consumption_factor",
+            "description": "Fuel consumption rate adjustment factor",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "safety_margin",
+            "description": "Safety margin for landing gear contact",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        },
+        {
+            "display_name": "emergency_override",
+            "description": "Emergency override threshold for manual control",
+            "data_type": "float",
+            "bounds": [
+                0.0,
+                1.0
+            ]
+        }
+    ],
+    "target": {
+        "name": "Landing Reward",
+        "description": "Maximize the landing reward score (typical range [-200, +200]). Successful landing yields +100 to +140 points. Optimal landings can reach +200.",
+        "direction": "maximize"
+    }
+}
