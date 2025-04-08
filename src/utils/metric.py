@@ -120,58 +120,42 @@ def save_trial_data(
             writer.writerows(rows)
 
 
-def extract_max_metric(exp: Experiment, metric_name: str) -> np.ndarray:
+def extract_metric(
+    exp: Experiment, metric_name: str, mode: str = 'max'
+) -> np.ndarray:
     """
-    提取实验对象中指定metric的最大值序列，用于所有实验结束后，结果的展示。对于 BatchTrial 来说，取该批次的最大值，
-    这样可以更好地反映BO算法探索到的最高性能点。
+    提取实验对象中指定metric的统计序列，用于所有实验结束后，结果的展示。
+    对于 BatchTrial 来说，根据mode参数取该批次的统计值（max/mean/min）
+
     参数：
         exp: 实验对象
         metric_name: 需要提取的指标名称（如'hartman6'），在 objective/constriant 中定义的"name"一样
+        mode: 统计模式，可选 'max'（最大值）、'mean'（均值）或 'min'（最小值），默认为 'max'
     返回：
-        np.ndarray: 按 trial_index 顺序排列的指标最大值数组
-        对于BatchTrial自动取该批次的最大值
+        np.ndarray: 按 trial_index 顺序排列的指标统计值数组
+        对于BatchTrial自动取该批次的统计值
+    异常：
+        ValueError: 当mode参数不是'max'、'mean'或'min'时抛出
     """
+    if mode not in ['max', 'mean', 'min']:
+        raise ValueError("mode参数必须是'max'、'mean'或'min'")
+
     # 获取原始数据并过滤目标指标
     df = exp.fetch_data().df
     metric_df = df[df['metric_name'] == metric_name]
 
-    # 按trial分组处理最大值
+    # 按trial分组处理统计值
     results = []
     for trial_idx, group in metric_df.groupby('trial_index'):
         # 判断是否为BatchTrial（依据每组arm数量）
         if len(group) > 1:
-            batch_max = group['mean'].max()
-            results.append((trial_idx, batch_max))
-        else:
-            results.append((trial_idx, group['mean'].iloc[0]))
-
-    # 按trial顺序排列并转换为数组
-    sorted_results = sorted(results, key=lambda x: x[0])
-    return np.array([val for _, val in sorted_results])
-
-
-def extract_mean_metric(exp: Experiment, metric_name: str) -> np.ndarray:
-    """
-    提取实验对象中指定metric的均值序列，用于所有实验结束后，结果的展示。对于 BatchTrial 来说，取该批次的均值，
-    可以反映上一轮 sample 的 candidates 整体水平。
-    参数：
-        exp: 实验对象
-        metric_name: 需要提取的指标名称（如'hartman6'），在 objective/constriant 中定义的"name"一样
-    返回：
-        np.ndarray: 按 trial_index 顺序排列的指标均值数组
-        对于BatchTrial自动取该批次的均值
-    """
-    # 获取原始数据并过滤目标指标
-    df = exp.fetch_data().df
-    metric_df = df[df['metric_name'] == metric_name]
-
-    # 按trial分组处理均值
-    results = []
-    for trial_idx, group in metric_df.groupby('trial_index'):
-        # 判断是否为BatchTrial（依据每组arm数量）
-        if len(group) > 1:
-            batch_mean = group['mean'].mean()
-            results.append((trial_idx, batch_mean))
+            if mode == 'max':
+                batch_value = group['mean'].max()
+            elif mode == 'mean':
+                batch_value = group['mean'].mean()
+            else:  # mode == 'min'
+                batch_value = group['mean'].min()
+            results.append((trial_idx, batch_value))
         else:
             results.append((trial_idx, group['mean'].iloc[0]))
 
