@@ -56,7 +56,7 @@ class LocalLMClient:
         )
 
         self.messages.append({"role": "assistant", "content": response})
-        return response
+        return response, ""
 
     def view_messages(self):
         """View message history for debugging"""
