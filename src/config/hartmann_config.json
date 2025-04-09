@@ -1,7 +1,7 @@
 {
     "name": "Multimodal Hartmann Optimization",
     "application_context": "Global Optimization Challenge",
-    "description": "Global minimization of the 3-dimensional Hartmann function, featuring multiple local minima with complex nonlinear parameter interactions. The global minimum is located at (0.114614, 0.555649, 0.852547) with f(x) ≈ -3.86278.",
+    "description": "Global minimization of the 6-dimensional Hartmann function, featuring multiple local minima with complex nonlinear parameter interactions. The global minimum is f(x) ≈ -3.86278.",
     "constraint": "Variables must satisfy 0 ≤ x_i ≤ 1. Function evaluations require precision control of α and β matrix parameters.",
     "parameter_definitions": [
         {

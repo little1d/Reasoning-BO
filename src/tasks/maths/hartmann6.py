@@ -70,7 +70,9 @@ class Hartmann6Metric(Metric):
         )
 
         # Convert parameters to numpy array in correct order
-        x = np.array([params[f"x{i+1}"] for i in range(6)])
+        x = np.array(
+            [params[param_name] for param_name in sorted(params.keys())]
+        )
 
         y = 0.0
         for j, alpha_j in enumerate(alpha):
