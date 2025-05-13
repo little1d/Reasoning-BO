@@ -5,12 +5,19 @@ from typing import Dict
 import os
 import re
 import glob
-
+from camel.agents import ChatAgent
+from camel.models import ModelFactory
+from camel.types import ModelPlatformType, ModelType
 from src.prompts.base import PromptManager
 from src.utils.metric import save_trial_data
 
 from src.utils.jsonl import add_to_jsonl, concatenate_jsonl
 from src.bo.models import BOModel
+from src.config import Config
+
+config = Config()
+
+system_message = "You are an expert at extracting json from text."
 
 
 class BaseReasoner:
@@ -41,6 +48,28 @@ class BaseReasoner:
         self.summary = ""
         self.report = ""
         self.keywords = ""
+        # ---------------------------------- chatagent init ----------------------------------
+        self.model = ModelFactory.create(
+            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+            api_key=config.QWQ_API_KEY,
+            url=config.QWQ_API_BASE,
+            model_type=config.NOTES_AGENT,
+            model_config_dict={"temperature": 0, "max_tokens": 2048},
+        )
+        # formatter
+        self.chat_agent = ChatAgent(
+            model=self.model,
+            system_message=system_message,
+        )
+
+    def _get_system_prompt_template(self, raw_insight: str) -> str:
+        """Helper method to generate the system prompt template with raw_insight"""
+        return f"""The following text contains a JSON object that may be wrapped in markdown or other formatting. 
+        Please extract just the JSON object and ensure it is properly formatted. 
+        Return ONLY the JSON object with no additional text or explanation.
+
+        Text to clean:
+        {raw_insight}"""
 
     def _load_config(self, path: str) -> Dict:
         with open(path, 'r', encoding='utf-8') as f:
@@ -213,11 +242,16 @@ class BaseReasoner:
             formatted_prompt = self.prompt_manager.format(
                 "initial_sampling", **meta_dict
             )
-            content, _ = self.client.generate(user_prompt=formatted_prompt)
+            raw_insight, _ = self.client.generate(user_prompt=formatted_prompt)
+            chat_agent_prompts = self._get_system_prompt_template(raw_insight)
+            insight = self.chat_agent.step(
+                chat_agent_prompts,
+            ).msg.content
             print(
-                f"Initial sampling process has done! and the insight is as follows\n {content}\n\n"
+                f"Initial sampling process has done! and the insight is as follows\n {insight}\n\n"
             )
-            return content
+
+            return insight
 
         except Exception as e:
             print(f"Error happended while initial sampling: {e}")
@@ -299,7 +333,12 @@ class BaseReasoner:
             formatted_prompt = self.prompt_manager.format(
                 "optimization_loop", **meta_dict
             )
-            insight, _ = self.client.generate(user_prompt=formatted_prompt)
+            raw_insight, _ = self.client.generate(user_prompt=formatted_prompt)
+            chat_agent_prompts = self._get_system_prompt_template(raw_insight)
+            insight = self.chat_agent.step(
+                chat_agent_prompts,
+            ).msg.content
+
             print(
                 f"Optimization loop iteration {trial.index} has done! and the insight is as follows\n {insight}\n\n"
             )

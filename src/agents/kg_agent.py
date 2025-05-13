@@ -18,7 +18,7 @@ import os
 import warnings
 from urllib.parse import urlparse
 
-from okagents.config import Config
+from src.config import Config
 
 config = Config()
 

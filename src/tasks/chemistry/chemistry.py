@@ -55,6 +55,8 @@ from pyre_extensions import none_throws
 class ChemistryProblemType(Enum):
     SUZUKI: str = "suzuki"
     DIRECT_ARYLATION: str = "direct_arylation"
+    Buchwald_Hartwig: str = "Buchwald_Hartwig"
+    CPA: str = "CPA"
 
 
 @dataclass(frozen=True)

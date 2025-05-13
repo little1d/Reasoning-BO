@@ -26,6 +26,7 @@ class Config:
         self.QWQ_API_KEY = os.getenv('QWQ_API_KEY')
         self.QWQ_API_BASE = os.getenv('QWQ_API_BASE')
         self.QWQ_MODEL_NAME = os.getenv('QWQ_MODEL_NAME')
+        self.NOTES_AGENT = os.getenv('NOTES_AGENT')
         self.NEO4J_URL = os.getenv("NEO4J_URL")
         self.NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
         self.NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")

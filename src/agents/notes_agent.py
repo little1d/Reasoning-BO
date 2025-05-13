@@ -12,8 +12,8 @@ from typing import Optional, List, Dict, Any, Type, Union
 from pydantic import BaseModel, Field
 from camel.agents import ChatAgent
 from camel.models import BaseModelBackend
-from okagents.agents.kg_agent import KGAgent
-from okagents.agents.milvus_agent import MilvusAgent
+from src.agents.kg_agent import KGAgent
+from src.agents.milvus_agent import MilvusAgent
 import json
 from camel.messages import BaseMessage
 import re

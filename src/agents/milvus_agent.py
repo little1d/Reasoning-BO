@@ -14,9 +14,8 @@ from camel.storages.vectordb_storages import MilvusStorage
 from camel.embeddings import OpenAIEmbedding
 from camel.retrievers import VectorRetriever
 from camel.storages.vectordb_storages import VectorDBStatus
-from okagents.config import Config
 import logging
-from okagents.config import Config
+from src.config import Config
 
 logger = logging.getLogger(__name__)
 config = Config()

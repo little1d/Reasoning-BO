@@ -28,8 +28,8 @@ class BOModel:
         self.experiment = experiment
         self.model_bridge = None
 
-    def hot_start(self, experiment):
-        NUM_SOBOL_TRIALS = 5
+    def hot_start(self, experiment, num_sobol_trials):
+        NUM_SOBOL_TRIALS = num_sobol_trials
         print(f"Running Sobol initialization trials...")
         # 需要在传递参数前定义好 search_space
         sobol = Models.SOBOL(search_space=experiment.search_space)
