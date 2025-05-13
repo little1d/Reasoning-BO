@@ -110,7 +110,7 @@ class QWQClient:
         return (self.content, self.reasoning_content)
 
     def view_messages(self):
-        """查看对话历史，方便调试"""
+        """View message history for debugging purposes"""
         for message in self.messages:
             print(f"{message['role'].capitalize()}: {message['content']}")
 
