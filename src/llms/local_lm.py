@@ -9,8 +9,6 @@ config = Config()
 
 
 class LocalLMClient:
-    """支持Qwen2.5的优化版本"""
-
     def __init__(self, model_path: str):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = AutoModelForCausalLM.from_pretrained(
@@ -59,18 +57,10 @@ class LocalLMClient:
         return response, ""
 
     def view_messages(self):
-        """View message history for debugging"""
         for message in self.messages:
             print(f"{message['role'].capitalize()}: {message['content']}")
 
     def save_messages(self, file_path):
-        """
-        Save client.messages(list) content as JSONL format with paired user, think, assistant content.
-
-        Args:
-            file_path: The filepath where JSONL data will be saved.
-        """
-
         print("Start saving the message data for this round of trials.\n")
         distill_data = {}
         for message in self.messages:

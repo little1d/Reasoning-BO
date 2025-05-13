@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 r"""
-@DATE: 2025-03-26 14:24:02
-@File: okagents/agents/chat_agent.py
+@DATE: 2025-05-13 21:17:05
+@File: src/agents/notes_agent.py
 @IDE: vscode
-@Description:
-    Notes Agent for extracting and managing key notes from reasoning data/preprocess data
 """
 
 from typing import Optional, List, Dict, Any, Type, Union
@@ -192,7 +190,7 @@ class NotesAgent:
             input=experiment_data
         )
 
-        # TODO 增加 web search 的 tool
+        # TODO Add web search tool
         if enable_research:
             final_prompt += (
                 "\n\nResearch and supplement any missing critical information."
@@ -211,20 +209,20 @@ class NotesAgent:
         """Internal method to store notes to both knowledge systems
 
         Args:
-            response: 可以是以下类型之一：
-                - camel.ChatAgentResponse: ChatAgentResponse.msg 是 camel.BaseMessage (包含JSON格式内容)
-                - 字符串列表，所有字段必须是str或List[str]
+            response: Can be one of the following types:
+                - camel.ChatAgentResponse: ChatAgentResponse.msg is camel.BaseMessage (contains JSON-formatted content)
+                - String list, all fields must be str or List[str]
         """
         if isinstance(response.msg, BaseMessage):
             try:
-                # 提取JSON内容部分 (去除可能的代码块标记)
+                # Extract JSON content part (remove possible code block markers)
                 content = (
                     response.msg.content.replace('```json\n', '')
                     .replace('```', '')
                     .strip()
                 )
                 data = json.loads(content)
-                # 收集所有可能的文本字段
+                # Collect all possible text fields
                 text_parts = "\n".join(
                     str(item)
                     for value in data.values()
@@ -235,7 +233,7 @@ class NotesAgent:
                     f"Failed to parse message content: {e}"
                 ) from e
 
-        # 处理纯列表输入
+        # Handle pure list input
         elif isinstance(response, (list, tuple)):
             text_parts = "\n".join(str(item) for item in response)
         else:
@@ -284,7 +282,6 @@ class NotesAgent:
         return self.chat_agent.step(prompt, response_format=response_schema)
 
     @staticmethod
-    # 与类相关，但是不依赖类或实例状态
     def format_retrieved_notes(results: Dict[str, Any]) -> str:
         """Format retrieved notes into a well-structured string with enhanced robustness
 

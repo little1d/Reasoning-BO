@@ -31,7 +31,6 @@ class BOModel:
     def hot_start(self, experiment, num_sobol_trials):
         NUM_SOBOL_TRIALS = num_sobol_trials
         print(f"Running Sobol initialization trials...")
-        # 需要在传递参数前定义好 search_space
         sobol = Models.SOBOL(search_space=experiment.search_space)
         for i in range(NUM_SOBOL_TRIALS):
             generator_run = sobol.gen(n=1)
@@ -41,7 +40,7 @@ class BOModel:
 
     def gen(self, n):
         print(
-            f"Start use bo algorithms to generate bo_recommendations candidates..."
+            f"Start using BO algorithms to generate bo_recommendations candidates..."
         )
         self.model_bridge = Models.BOTORCH_MODULAR(
             experiment=self.experiment,
@@ -58,7 +57,6 @@ class BOModel:
         return self.model_bridge.gen(n=n)
 
     def easy_render_hartmann6(self):
-        # 只适用于 gen(n=1)和 notbook，因为 objective_means 只有那个有
         objective_means = np.array(
             [
                 [

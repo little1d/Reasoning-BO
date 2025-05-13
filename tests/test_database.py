@@ -8,7 +8,7 @@ config = Config()
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_milvus_connection():
-    # host 填 docker 容器所在机器 ip，在 .env 中配置
+    # Host should be the IP address of the machine where the docker container is located, configured in the .env file.
     connections.connect(
         alias="default", host=config.MILVUS_HOST, port=config.MILVUS_PORT
     )

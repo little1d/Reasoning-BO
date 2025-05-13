@@ -104,8 +104,7 @@ class Test_BOModel:
 
 class TestDSReasoner:
     def test_generate_overview(self):
-        # 这路径太难写了。。。
-        file_path = "/Users/little1d/Desktop/Code/Faithful-BO/src/config/hartmann6_config.json"
+        file_path = "Reasoning-BO/src/config/hartmann6_config.json"
         ds_reasoner = DSReasoner(file_path)
         overview = ds_reasoner.generate_overview()
         print(overview)
