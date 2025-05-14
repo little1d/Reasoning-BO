@@ -16,7 +16,6 @@ playground/*
 swanlog/
 
 # Experiment result
-/data/
 swanlog/
 slurm-*.out
 
