@@ -6,7 +6,7 @@ Our work introduces a novel Bayesian Optimization workflow that leverages the re
 
 ![Main Architecture](assets/main.png)
 
-The Bayesian Optimization workflow is built upon the [Ax Platform](https://ax.dev/). For the Knowledge-Enhanced Multi-Agent system, we use the [Camel Framework](https://camel-ai.readthedocs.io/en/latest/) to provide a simple and extensible interface for agent interactions, enabling robust reasoning over domain-specific knowledge.
+The Bayesian Optimization workflow is built upon the [Ax Platform](https://ax.dev/). For the Knowledge-Enhanced Multi-Agent system, we use the [Camel Framework](https://docs.camel-ai.org/) to provide a simple and extensible interface for agent interactions, enabling robust reasoning over domain-specific knowledge.
 
 For more details on how Bayesian Optimization is implemented within the Ax framework, and for a hands-on experience with our algorithms, you can explore the Jupyter notebooks available in the `recipes` directory. These notebooks provide interactive examples and tutorials to help you get started.
 

@@ -13,7 +13,7 @@ conda activate bo
 RESULT_DIR="./data/results"
 MODEL_PATH="/home/bingxing2/ailab/group/ai4phys/our-qwen2.5-14b"
 
-python ./experiment.py \
+python scripts/experiment.py \
     --exp_config_path "./src/config/suzuki_config.json" \
     --metric_name "suzuki" \
     --model_type  "qwq-plus-32b"  \
