@@ -23,6 +23,3 @@ slurm-*.out
 # OS specific
 .DS_Store
 
-# scripts
-/scripts
-
