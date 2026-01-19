@@ -1,4 +1,9 @@
-# Reasoning BO: Enhancing Bayesian Optimization with the Long-Context Reasoning Power of LLMs
+<h1 align="center">Reasoning BO: Enhancing Bayesian Optimization with the Long-Context Reasoning Power of LLMs</h1>
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2505.12833"><img src="https://img.shields.io/badge/arXiv-2505.12833-b31b1b.svg" alt="arXiv"></a>
+  <a href="https://swanlab.cn/space/ovo"><img src="https://raw.githubusercontent.com/SwanHubX/assets/main/badge2.svg" alt="SwanLab"></a>
+</p>
 
 ## Overview
 
@@ -177,3 +182,19 @@ We would like to express our gratitude to the following frameworks that have sig
 1. **Ax Framework**: A powerful bayesian optimization framework developed by Facebook, available at [https://github.com/facebook/Ax](https://github.com/facebook/Ax).
 2. **Camel Framework**: An extensible and well-structured multi-agent framework, designed for easy customization and integration. Accessible at [https://github.com/camel-ai/camel](https://github.com/camel-ai/camel).
 3. **SwanLab**: An excellent platform for experiment tracking and management, found at [https://github.com/SwanHubX/SwanLab](https://github.com/SwanHubX/SwanLab).
+
+## Citation
+
+If you find this work useful, please cite our paper:
+
+```bibtex
+@article{yang2025reasoningboenhancingbayesian,
+      title={Reasoning BO: Enhancing Bayesian Optimization with Long-Context Reasoning Power of LLMs}, 
+      author={Zhuo Yang and Daolang Wang and Lingli Ge and Beilun Wang and Tianfan Fu and Yuqiang Li},
+      year={2025},
+      eprint={2505.12833},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2505.12833}, 
+}
+```
